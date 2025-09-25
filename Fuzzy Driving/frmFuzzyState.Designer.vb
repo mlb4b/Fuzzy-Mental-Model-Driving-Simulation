@@ -31,7 +31,7 @@ Partial Class frmFuzzyState
         fuzzNeutral = New cntrlFuzzySlider()
         fuzzDrive = New cntrlFuzzySlider()
         buttonOk = New Button()
-        lblMessage = New Label()
+        lblMessage = New RichTextBox()
         SuspendLayout()
         ' 
         ' lblPark
@@ -117,11 +117,15 @@ Partial Class frmFuzzyState
         ' 
         ' lblMessage
         ' 
-        lblMessage.Location = New Point(45, 27)
+        lblMessage.BackColor = SystemColors.ButtonFace
+        lblMessage.BorderStyle = BorderStyle.None
+        lblMessage.Location = New Point(45, 29)
         lblMessage.Name = "lblMessage"
-        lblMessage.Size = New Size(1284, 54)
-        lblMessage.TabIndex = 5
-        lblMessage.Text = "Use the sliders to indicate the deree to which the transimision is in each of the following states."
+        lblMessage.ReadOnly = True
+        lblMessage.Size = New Size(1284, 79)
+        lblMessage.TabIndex = 6
+        lblMessage.TabStop = False
+        lblMessage.Text = "Use the sliders to indicate the deree to which you think the car is in each of the following states."
         ' 
         ' frmFuzzyState
         ' 
@@ -166,5 +170,5 @@ Partial Class frmFuzzyState
     Friend WithEvents fuzzNeutral As cntrlFuzzySlider
     Friend WithEvents fuzzDrive As cntrlFuzzySlider
     Friend WithEvents buttonOk As Button
-    Friend WithEvents lblMessage As Label
+    Friend WithEvents lblMessage As RichTextBox
 End Class

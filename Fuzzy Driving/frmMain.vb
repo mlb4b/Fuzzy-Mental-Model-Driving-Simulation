@@ -1,4 +1,5 @@
 ﻿Imports System.ComponentModel
+Imports SharpDX
 Imports SharpDX.DirectInput
 'Imports SharpDX.XInput
 Public Class frmMain
@@ -219,11 +220,18 @@ Public Class frmMain
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
-        MsgBox(GetFuzzyState("Please rate your current emotional state").Item(DriveStates.REVERSE))
+        MsgBox(GetFuzzyState("").Item(DriveStates.REVERSE))
+    End Sub
+
+    Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
+        MsgBox(GetFuzzyInput(TransmissionInput.UP1).Item(TransmissionInput.UP1))
     End Sub
 
     Private Function GetFuzzyState(message As String) As Collection
-        frmFuzzyState.lblMessage.Text = message
+        'Use the sliders to indicate the deree to which the transimision is in each of the following states.
+        If message <> "" Then
+            frmFuzzyState.SetLabelMessage(message)
+        End If
         frmFuzzyState.ShowDialog()
         If frmFuzzyState.DialogResult = DialogResult.OK Then
             Dim results As New Collection
@@ -231,6 +239,25 @@ Public Class frmMain
             results.Add(frmFuzzyState.fuzzReverse.Value, DriveStates.REVERSE)
             results.Add(frmFuzzyState.fuzzNeutral.Value, DriveStates.NEUTRAL)
             results.Add(frmFuzzyState.fuzzDrive.Value, DriveStates.DRIVE)
+            frmFuzzyState.Close()
+            Return results
+        Else
+            Return Nothing
+        End If
+    End Function
+
+    Private Function GetFuzzyInput(tInput As String) As Collection
+        'frmFuzzyState.lblMessage.Text = message
+        frmFuzzyInput.lblAction.Text = tInput
+        frmFuzzyInput.ShowDialog()
+        If frmFuzzyInput.DialogResult = DialogResult.OK Then
+            Dim results As New Collection
+            results.Add(frmFuzzyInput.fuzzUp1.Value, TransmissionInput.UP1)
+            results.Add(frmFuzzyInput.fuzzUp2.Value, TransmissionInput.UP2)
+            results.Add(frmFuzzyInput.fuzzUp3.Value, TransmissionInput.UP3)
+            results.Add(frmFuzzyInput.fuzzDown1.Value, TransmissionInput.DOWN1)
+            results.Add(frmFuzzyInput.fuzzDown2.Value, TransmissionInput.DOWN2)
+            results.Add(frmFuzzyInput.fuzzDown3.Value, TransmissionInput.DOWN3)
             frmFuzzyState.Close()
             Return results
         Else
@@ -253,5 +280,9 @@ Public Class frmMain
         If MsgBox("Are you sure you want to exit the application?", MsgBoxStyle.YesNo + MsgBoxStyle.Question, "Confirm Quit") = MsgBoxResult.No Then
             e.Cancel = True
         End If
+    End Sub
+
+    Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
+        MsgBox(GetFuzzyState("Assume that you know that the car is in (D) Drive and you know that input Up × 1 occured and was recognized by the system. Use the sliders to indicate the degree to which you think this will put the car into each of the following states.").Item(DriveStates.REVERSE))
     End Sub
 End Class

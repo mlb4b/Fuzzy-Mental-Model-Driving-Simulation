@@ -1,8 +1,8 @@
 ﻿Public Class DriveStates
-    Public Const PARK As String = "P"
-    Public Const REVERSE As String = "R"
-    Public Const NEUTRAL As String = "N"
-    Public Const DRIVE As String = "D"
+    Public Const PARK As String = "(P) Park"
+    Public Const REVERSE As String = "(R) Reverse"
+    Public Const NEUTRAL As String = "(N) Neutral"
+    Public Const DRIVE As String = "(D) Drive"
 End Class
 
 'Public Enum DriveStates

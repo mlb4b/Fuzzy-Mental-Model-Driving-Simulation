@@ -1,5 +1,7 @@
 ﻿Imports System.ComponentModel
 
+'a variable containing words to be bolded in the message label based on the constants in DriveStates.vb and TransmissionInput.vb
+
 Public Class frmFuzzyState
 
     Private userClose As Boolean = True
@@ -25,6 +27,31 @@ Public Class frmFuzzyState
             e.Cancel = True
         End If
     End Sub
+
+    Public Sub SetLabelMessage(ByVal message As String)
+        If message <> "" Then
+            lblMessage.Text = message
+            For Each word In wordsToBold
+                BoldWordInRichTextBox(word)
+            Next
+        End If
+    End Sub
+
+    'subroutine to bold a specific word in the rich text box lblMessage
+    Private Sub BoldWordInRichTextBox(ByVal word As String)
+        Dim startIndex As Integer = 0
+        While startIndex < lblMessage.TextLength
+            Dim wordIndex As Integer = lblMessage.Text.IndexOf(word, startIndex, StringComparison.CurrentCultureIgnoreCase)
+            If wordIndex = -1 Then
+                Exit While
+            End If
+            lblMessage.Select(wordIndex, word.Length)
+            lblMessage.SelectionFont = New Font(lblMessage.Font, FontStyle.Bold)
+            startIndex = wordIndex + word.Length
+        End While
+        lblMessage.Select(0, 0) 'remove selection
+    End Sub
+
 
 End Class
 

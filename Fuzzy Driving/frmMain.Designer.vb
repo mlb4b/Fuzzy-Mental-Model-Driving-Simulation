@@ -33,6 +33,8 @@ Partial Class frmMain
         PictureBox1 = New PictureBox()
         lblInstructions = New Label()
         Button2 = New Button()
+        Button3 = New Button()
+        Button4 = New Button()
         CType(picWheel, ComponentModel.ISupportInitialize).BeginInit()
         CType(picShifter, ComponentModel.ISupportInitialize).BeginInit()
         CType(picAnimation, ComponentModel.ISupportInitialize).BeginInit()
@@ -86,7 +88,7 @@ Partial Class frmMain
         ' 
         ' Button1
         ' 
-        Button1.Location = New Point(1558, 559)
+        Button1.Location = New Point(1370, 558)
         Button1.Name = "Button1"
         Button1.Size = New Size(118, 55)
         Button1.TabIndex = 4
@@ -117,21 +119,41 @@ Partial Class frmMain
         ' 
         ' Button2
         ' 
-        Button2.Location = New Point(1713, 558)
+        Button2.Location = New Point(1612, 558)
         Button2.Name = "Button2"
         Button2.Size = New Size(112, 56)
         Button2.TabIndex = 7
         Button2.Text = "Button2"
         Button2.UseVisualStyleBackColor = True
         ' 
+        ' Button3
+        ' 
+        Button3.Location = New Point(1494, 558)
+        Button3.Name = "Button3"
+        Button3.Size = New Size(112, 56)
+        Button3.TabIndex = 7
+        Button3.Text = "Button3"
+        Button3.UseVisualStyleBackColor = True
+        ' 
+        ' Button4
+        ' 
+        Button4.Location = New Point(1370, 632)
+        Button4.Name = "Button4"
+        Button4.Size = New Size(118, 55)
+        Button4.TabIndex = 4
+        Button4.Text = "Button4"
+        Button4.UseVisualStyleBackColor = True
+        ' 
         ' frmMain
         ' 
         AutoScaleDimensions = New SizeF(13F, 32F)
         AutoScaleMode = AutoScaleMode.Font
         ClientSize = New Size(2059, 1333)
+        Controls.Add(Button3)
         Controls.Add(Button2)
         Controls.Add(lblInstructions)
         Controls.Add(PictureBox1)
+        Controls.Add(Button4)
         Controls.Add(Button1)
         Controls.Add(picAnimation)
         Controls.Add(picShifter)
@@ -158,5 +180,7 @@ Partial Class frmMain
     Friend WithEvents PictureBox1 As PictureBox
     Friend WithEvents lblInstructions As Label
     Friend WithEvents Button2 As Button
+    Friend WithEvents Button3 As Button
+    Friend WithEvents Button4 As Button
 
 End Class

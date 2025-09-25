@@ -35,10 +35,12 @@ Partial Class frmFuzzyInput
         lblDown2 = New Label()
         fuzzDown3 = New cntrlFuzzySlider()
         lblDown3 = New Label()
-        Label1 = New Label()
+        lblAction = New Label()
         Label2 = New Label()
         fuzzDown2 = New cntrlFuzzySlider()
         Label3 = New Label()
+        lblGas = New Label()
+        fuzzGas = New cntrlFuzzySlider()
         SuspendLayout()
         ' 
         ' lblMessage
@@ -47,11 +49,11 @@ Partial Class frmFuzzyInput
         lblMessage.Name = "lblMessage"
         lblMessage.Size = New Size(1584, 48)
         lblMessage.TabIndex = 15
-        lblMessage.Text = "Use the sliders to indicate the extent that performing the given action on the car's transmission will be recognized as each of the possible actions."
+        lblMessage.Text = "Use the sliders to indicate the degree that you think performing the given action will be recognized as each of the possible actions."
         ' 
         ' buttonOk
         ' 
-        buttonOk.Location = New Point(741, 1096)
+        buttonOk.Location = New Point(741, 1274)
         buttonOk.Name = "buttonOk"
         buttonOk.Size = New Size(150, 46)
         buttonOk.TabIndex = 14
@@ -158,15 +160,15 @@ Partial Class frmFuzzyInput
         lblDown3.TabIndex = 18
         lblDown3.Text = "Down × 3"
         ' 
-        ' Label1
+        ' lblAction
         ' 
-        Label1.AutoSize = True
-        Label1.Font = New Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
-        Label1.Location = New Point(30, 200)
-        Label1.Name = "Label1"
-        Label1.Size = New Size(91, 32)
-        Label1.TabIndex = 9
-        Label1.Text = "Up × 1"
+        lblAction.AutoSize = True
+        lblAction.Font = New Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
+        lblAction.Location = New Point(30, 200)
+        lblAction.Name = "lblAction"
+        lblAction.Size = New Size(91, 32)
+        lblAction.TabIndex = 9
+        lblAction.Text = "Up × 1"
         ' 
         ' Label2
         ' 
@@ -194,11 +196,31 @@ Partial Class frmFuzzyInput
         Label3.TabIndex = 9
         Label3.Text = "It will be interpretted as:"
         ' 
+        ' lblGas
+        ' 
+        lblGas.AutoSize = True
+        lblGas.Font = New Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
+        lblGas.Location = New Point(241, 1159)
+        lblGas.Name = "lblGas"
+        lblGas.Size = New Size(122, 32)
+        lblGas.TabIndex = 18
+        lblGas.Text = "Press Gas"
+        ' 
+        ' fuzzGas
+        ' 
+        fuzzGas.Location = New Point(464, 1122)
+        fuzzGas.Name = "fuzzGas"
+        fuzzGas.Size = New Size(1119, 137)
+        fuzzGas.TabIndex = 19
+        fuzzGas.Value = 0R
+        ' 
         ' frmFuzzyInput
         ' 
         AutoScaleDimensions = New SizeF(13F, 32F)
         AutoScaleMode = AutoScaleMode.Font
-        ClientSize = New Size(1633, 1190)
+        ClientSize = New Size(1633, 1346)
+        Controls.Add(fuzzGas)
+        Controls.Add(lblGas)
         Controls.Add(fuzzDown3)
         Controls.Add(lblDown3)
         Controls.Add(fuzzDown2)
@@ -214,7 +236,7 @@ Partial Class frmFuzzyInput
         Controls.Add(lblUp2)
         Controls.Add(Label3)
         Controls.Add(Label2)
-        Controls.Add(Label1)
+        Controls.Add(lblAction)
         Controls.Add(lblUp1)
         FormBorderStyle = FormBorderStyle.FixedDialog
         MaximizeBox = False
@@ -237,8 +259,10 @@ Partial Class frmFuzzyInput
     Friend WithEvents lblDown2 As Label
     Friend WithEvents fuzzDown3 As cntrlFuzzySlider
     Friend WithEvents lblDown3 As Label
-    Friend WithEvents Label1 As Label
+    Friend WithEvents lblAction As Label
     Friend WithEvents Label2 As Label
     Friend WithEvents fuzzDown2 As cntrlFuzzySlider
     Friend WithEvents Label3 As Label
+    Friend WithEvents lblGas As Label
+    Friend WithEvents fuzzGas As cntrlFuzzySlider
 End Class
