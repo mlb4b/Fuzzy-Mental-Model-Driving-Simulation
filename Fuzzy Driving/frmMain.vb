@@ -1,4 +1,6 @@
 ﻿Imports System.ComponentModel
+Imports System.Diagnostics.Eventing.Reader
+Imports System.Net.Mail
 Imports SharpDX
 Imports SharpDX.DirectInput
 'Imports SharpDX.XInput
@@ -19,6 +21,7 @@ Public Class frmMain
     Private originalImage As Image
     Private shiftDefaultTop As Integer
     Private maxShiftTop As Integer = 200
+    Private failureRate As Double = 0.5
 
     Private animationFrames() As Image
     Private currentFrameIndex As Integer = 0
@@ -31,6 +34,8 @@ Public Class frmMain
     Private wheelHeight As Integer = 800
 
     Private instructions As New Queue(Of String)()
+    Private nextInstructionCountDown As Long = -1
+    Private pollTimer As New Timer()
 
     Private Sub frmMain_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         originalImage = picWheel.Image
@@ -48,6 +53,8 @@ Public Class frmMain
             My.Resources.r9,
             My.Resources.r10
         }
+
+        lblInstructions.Text = Instruction.WAIT
 
         ' get the wheel ratio from the image size
         wheelRatio = picWheel.Width / picWheel.Height
@@ -86,7 +93,6 @@ Public Class frmMain
         joystick.Acquire()
 
         ' Start polling (for demo, use a timer)
-        Dim pollTimer As New Timer()
         AddHandler pollTimer.Tick, AddressOf PollJoystick
         pollTimer.Interval = 50
         pollTimer.Start()
@@ -99,14 +105,14 @@ Public Class frmMain
         ' Example: read X and Y axis
         Dim x = state.X
         Dim y = state.Y
-        Dim z = state.RotationZ
-
+        Dim z = state.RotationY
+        TextBox1.Text = state.ToString()
         ' Example: read buttons
         Dim buttons = state.Buttons
         ' Do something with the input...
         ' For demonstration, show in title bar:
         'Me.Text = buttons(8).ToString & " " & buttons(9).ToString
-        Dim driveButton = buttons(9)
+        Dim driveButton = state.Z < 30000
 
         If driveButton And lblDriveMode.Text = DriveStates.DRIVE Then
             timerStepCount = 1
@@ -120,7 +126,8 @@ Public Class frmMain
         End If
 
         Dim now = DateTime.Now
-        If Not zLocked And ((now - lastShiftTime).TotalMilliseconds >= shiftCooldown) Then
+
+        If Not zLocked And ((now - lastShiftTime).TotalMilliseconds >= shiftCooldown) And (Rnd() > failureRate) Then
             If z < zMin + zSlop Then
                 zLocked = True
                 ShiftUp()
@@ -138,21 +145,48 @@ Public Class frmMain
         picShifter.Top = shiftDefaultTop + ((z - axisMax / 2) / axisMax) * maxShiftTop ' Adjust Y position based on Y axis input
 
         'deal with instructions if any
-        If instructions.Count > 0 Then
-            If ((instructions.Peek() = Instruction.GO_GAS And driveButton) Or (instructionToDriveState() = lblDriveMode.Text)) Then
-                instructions.Dequeue()
-                Interaction.Beep()
+        'if the last instruction has been satisfied, set countdown
+        If nextInstructionCountDown = 0 Then
+            'do nothing
+            Dim j As Index
+            j = 0
+        End If
+        If lblInstructions.Text = Instruction.WAIT And instructions.Count > 0 Then
+            lblInstructions.Text = instructions.Peek()
+            instructions.Dequeue()
+            Interaction.Beep()
+        Else
+            If nextInstructionCountDown < 0 And (((lblInstructions.Text = Instruction.GO_GAS And driveButton) Or (driveMode = instructionToDriveState()))) Then
+                nextInstructionCountDown = 10
+            End If
+            If nextInstructionCountDown = 0 Then
+                If instructions.Count > 0 Then
+                    If instructions.Peek() = Instruction.GET_STATE Then
+                        pollTimer.Stop()
+                        Dim results As Dictionary(Of String, String) = GetFuzzyState(instructions.Peek())
+                        'process results here
+                        pollTimer.Start()
+                    ElseIf Instruction.IsInputRequest(instructions.Peek()) Then
+                        pollTimer.Stop()
+                        Dim results As Dictionary(Of String, String) = GetFuzzyInput(instructions.Peek())
+                        'process results here
+                        pollTimer.Start()
+                    Else
+                        lblInstructions.Text = instructions.Peek()
+                    End If
+                    instructions.Dequeue()
+                    Interaction.Beep()
+                Else
+                    lblInstructions.Text = Instruction.WAIT
+                End If
             End If
         End If
-        If instructions.Count = 0 Then
-            lblInstructions.Text = Instruction.WAIT
-        Else
-            lblInstructions.Text = instructions.Peek()
-        End If
+        nextInstructionCountDown = Math.Max(nextInstructionCountDown - 1, -1)
+        TextBox1.Text = CStr(z)
     End Sub
 
     Private Function instructionToDriveState() As String
-        Select Case instructions.Peek()
+        Select Case lblInstructions.Text
             Case Instruction.GO_PARK
                 Return DriveStates.PARK
             Case Instruction.GO_REVERSE
@@ -227,40 +261,71 @@ Public Class frmMain
         MsgBox(GetFuzzyInput(TransmissionInput.UP1).Item(TransmissionInput.UP1))
     End Sub
 
-    Private Function GetFuzzyState(message As String) As Collection
+    Private Function GetFuzzyState(message As String) As Dictionary(Of String, String)
         'Use the sliders to indicate the deree to which the transimision is in each of the following states.
         If message <> "" Then
             frmFuzzyState.SetLabelMessage(message)
         End If
         frmFuzzyState.ShowDialog()
         If frmFuzzyState.DialogResult = DialogResult.OK Then
-            Dim results As New Collection
-            results.Add(frmFuzzyState.fuzzPark.Value, DriveStates.PARK)
-            results.Add(frmFuzzyState.fuzzReverse.Value, DriveStates.REVERSE)
-            results.Add(frmFuzzyState.fuzzNeutral.Value, DriveStates.NEUTRAL)
-            results.Add(frmFuzzyState.fuzzDrive.Value, DriveStates.DRIVE)
+            Dim results As New Dictionary(Of String, String)
+            results.Add(DriveStates.PARK, frmFuzzyState.fuzzPark.Value)
+            results.Add(DriveStates.REVERSE, frmFuzzyState.fuzzReverse.Value)
+            results.Add(DriveStates.NEUTRAL, frmFuzzyState.fuzzNeutral.Value)
+            results.Add(DriveStates.DRIVE, frmFuzzyState.fuzzDrive.Value)
             frmFuzzyState.Close()
             Return results
         Else
+            frmFuzzyState.Close()
             Return Nothing
         End If
     End Function
 
-    Private Function GetFuzzyInput(tInput As String) As Collection
+    Private Function GetFuzzyInput(tInput As String) As Dictionary(Of String, String)
         'frmFuzzyState.lblMessage.Text = message
         frmFuzzyInput.lblAction.Text = tInput
         frmFuzzyInput.ShowDialog()
         If frmFuzzyInput.DialogResult = DialogResult.OK Then
-            Dim results As New Collection
-            results.Add(frmFuzzyInput.fuzzUp1.Value, TransmissionInput.UP1)
-            results.Add(frmFuzzyInput.fuzzUp2.Value, TransmissionInput.UP2)
-            results.Add(frmFuzzyInput.fuzzUp3.Value, TransmissionInput.UP3)
-            results.Add(frmFuzzyInput.fuzzDown1.Value, TransmissionInput.DOWN1)
-            results.Add(frmFuzzyInput.fuzzDown2.Value, TransmissionInput.DOWN2)
-            results.Add(frmFuzzyInput.fuzzDown3.Value, TransmissionInput.DOWN3)
-            frmFuzzyState.Close()
+            Dim results As New Dictionary(Of String, String)
+            results.Add(TransmissionInput.UP1, frmFuzzyInput.fuzzUp1.Value)
+            results.Add(TransmissionInput.UP2, frmFuzzyInput.fuzzUp2.Value)
+            results.Add(TransmissionInput.UP3, frmFuzzyInput.fuzzUp3.Value)
+            results.Add(TransmissionInput.DOWN1, frmFuzzyInput.fuzzDown1.Value)
+            results.Add(TransmissionInput.DOWN2, frmFuzzyInput.fuzzDown2.Value)
+            results.Add(TransmissionInput.DOWN3, frmFuzzyInput.fuzzDown3.Value)
+            frmFuzzyInput.Close()
             Return results
         Else
+            frmFuzzyInput.Close()
+            Return Nothing
+        End If
+    End Function
+
+    Private Function GetDemographics() As Dictionary(Of String, String)
+        frmDemographics.ShowDialog()
+        If frmDemographics.DialogResult = DialogResult.OK Then
+            Dim results As New Dictionary(Of String, String)
+            results.Add("Age", frmDemographics.age.Text)
+            results.Add("Race", frmDemographics.race.Text)
+            results.Add("AdditionalRace", frmDemographics.additionalRace.Text)
+            results.Add("AdditionalGender", frmDemographics.additionalGender.Text)
+            frmDemographics.Close()
+            Return results
+        Else
+            frmDemographics.Close()
+            Return Nothing
+        End If
+    End Function
+
+    Private Function GetSurprise() As Dictionary(Of String, String)
+        frmSurprise.ShowDialog()
+        If frmSurprise.DialogResult = DialogResult.OK Then
+            Dim results As New Dictionary(Of String, String)
+            results.Add("Surprise", frmSurprise.fuzzSurprise.Value)
+            frmSurprise.Close()
+            Return results
+        Else
+            frmSurprise.Close()
             Return Nothing
         End If
     End Function
@@ -274,6 +339,8 @@ Public Class frmMain
         instructions.Enqueue(Instruction.GO_GAS)
         instructions.Enqueue(Instruction.GO_PARK)
         instructions.Enqueue(Instruction.GO_GAS)
+        instructions.Enqueue(Instruction.GET_STATE)
+
     End Sub
 
     Private Sub frmMain_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
@@ -284,5 +351,13 @@ Public Class frmMain
 
     Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
         MsgBox(GetFuzzyState("Assume that you know that the car is in (D) Drive and you know that input Up × 1 occured and was recognized by the system. Use the sliders to indicate the degree to which you think this will put the car into each of the following states.").Item(DriveStates.REVERSE))
+    End Sub
+
+    Private Sub Button5_Click(sender As Object, e As EventArgs) Handles Button5.Click
+        GetDemographics()
+    End Sub
+
+    Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click
+        GetSurprise()
     End Sub
 End Class

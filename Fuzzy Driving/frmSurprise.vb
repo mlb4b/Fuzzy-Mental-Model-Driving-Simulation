@@ -1,18 +1,15 @@
 ﻿Imports System.ComponentModel
+Imports Windows.Win32.System
 
-Public Class frmFuzzyInput
+Public Class frmSurprise
 
     Private userClose As Boolean = True
 
     Private Sub buttonOk_Click(sender As Object, e As EventArgs) Handles buttonOk.Click
-        For Each con In Me.Controls
-            If TypeOf con Is cntrlFuzzySlider Then
-                If Not CType(con, cntrlFuzzySlider).ValSet Then
-                    MsgBox("Please provide a rating for all the options before submitting.", MsgBoxStyle.Exclamation, "Ratings Required")
-                    Return
-                End If
-            End If
-        Next con
+        If Not fuzzSurprise.ValSet Then
+            MsgBox("Please provide a rating before submitting.", MsgBoxStyle.Exclamation, "Ratings Required")
+            Return
+        End If
         If MsgBox("Are you sure you want to continue? Click Yes to conrirm the ratings you have provided on the form. Click No to review your ratings.", MsgBoxStyle.YesNo + MsgBoxStyle.Question, "Confirm Ratings") = MsgBoxResult.Yes Then
             Me.DialogResult = DialogResult.OK
             userClose = False
@@ -24,9 +21,5 @@ Public Class frmFuzzyInput
         If userClose Then
             e.Cancel = True
         End If
-    End Sub
-
-    Private Sub frmFuzzyInput_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-
     End Sub
 End Class

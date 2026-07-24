@@ -52,6 +52,8 @@ Public Class frmFuzzyState
         lblMessage.Select(0, 0) 'remove selection
     End Sub
 
+    Private Sub frmFuzzyState_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
+    End Sub
 End Class
 

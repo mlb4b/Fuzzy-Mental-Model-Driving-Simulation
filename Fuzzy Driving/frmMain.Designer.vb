@@ -35,6 +35,9 @@ Partial Class frmMain
         Button2 = New Button()
         Button3 = New Button()
         Button4 = New Button()
+        Button5 = New Button()
+        Button6 = New Button()
+        TextBox1 = New TextBox()
         CType(picWheel, ComponentModel.ISupportInitialize).BeginInit()
         CType(picShifter, ComponentModel.ISupportInitialize).BeginInit()
         CType(picAnimation, ComponentModel.ISupportInitialize).BeginInit()
@@ -49,7 +52,6 @@ Partial Class frmMain
         lblDriveMode.Size = New Size(27, 32)
         lblDriveMode.TabIndex = 0
         lblDriveMode.Text = "P"
-        lblDriveMode.Visible = False
         ' 
         ' picWheel
         ' 
@@ -92,7 +94,7 @@ Partial Class frmMain
         Button1.Name = "Button1"
         Button1.Size = New Size(118, 55)
         Button1.TabIndex = 4
-        Button1.Text = "Button1"
+        Button1.Text = "FuzzyState"
         Button1.UseVisualStyleBackColor = True
         ' 
         ' PictureBox1
@@ -109,7 +111,7 @@ Partial Class frmMain
         ' 
         lblInstructions.BackColor = SystemColors.GradientInactiveCaption
         lblInstructions.BorderStyle = BorderStyle.FixedSingle
-        lblInstructions.Font = New Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
+        lblInstructions.Font = New Font("Segoe UI", 12.0F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
         lblInstructions.Location = New Point(981, 806)
         lblInstructions.Name = "lblInstructions"
         lblInstructions.Size = New Size(273, 136)
@@ -123,7 +125,7 @@ Partial Class frmMain
         Button2.Name = "Button2"
         Button2.Size = New Size(112, 56)
         Button2.TabIndex = 7
-        Button2.Text = "Button2"
+        Button2.Text = "Enqueue"
         Button2.UseVisualStyleBackColor = True
         ' 
         ' Button3
@@ -132,7 +134,7 @@ Partial Class frmMain
         Button3.Name = "Button3"
         Button3.Size = New Size(112, 56)
         Button3.TabIndex = 7
-        Button3.Text = "Button3"
+        Button3.Text = "FuzzyInput"
         Button3.UseVisualStyleBackColor = True
         ' 
         ' Button4
@@ -141,18 +143,47 @@ Partial Class frmMain
         Button4.Name = "Button4"
         Button4.Size = New Size(118, 55)
         Button4.TabIndex = 4
-        Button4.Text = "Button4"
+        Button4.Text = "State?"
         Button4.UseVisualStyleBackColor = True
+        ' 
+        ' Button5
+        ' 
+        Button5.Location = New Point(1494, 632)
+        Button5.Name = "Button5"
+        Button5.Size = New Size(112, 55)
+        Button5.TabIndex = 4
+        Button5.Text = "Demographics"
+        Button5.UseVisualStyleBackColor = True
+        ' 
+        ' Button6
+        ' 
+        Button6.Location = New Point(1612, 632)
+        Button6.Name = "Button6"
+        Button6.Size = New Size(118, 55)
+        Button6.TabIndex = 4
+        Button6.Text = "Surprise"
+        Button6.UseVisualStyleBackColor = True
+        ' 
+        ' TextBox1
+        ' 
+        TextBox1.Location = New Point(905, 1133)
+        TextBox1.Multiline = True
+        TextBox1.Name = "TextBox1"
+        TextBox1.Size = New Size(1128, 226)
+        TextBox1.TabIndex = 8
         ' 
         ' frmMain
         ' 
-        AutoScaleDimensions = New SizeF(13F, 32F)
+        AutoScaleDimensions = New SizeF(13.0F, 32.0F)
         AutoScaleMode = AutoScaleMode.Font
         ClientSize = New Size(2059, 1333)
+        Controls.Add(TextBox1)
         Controls.Add(Button3)
         Controls.Add(Button2)
         Controls.Add(lblInstructions)
         Controls.Add(PictureBox1)
+        Controls.Add(Button6)
+        Controls.Add(Button5)
         Controls.Add(Button4)
         Controls.Add(Button1)
         Controls.Add(picAnimation)
@@ -182,5 +213,8 @@ Partial Class frmMain
     Friend WithEvents Button2 As Button
     Friend WithEvents Button3 As Button
     Friend WithEvents Button4 As Button
+    Friend WithEvents Button5 As Button
+    Friend WithEvents Button6 As Button
+    Friend WithEvents TextBox1 As TextBox
 
 End Class
