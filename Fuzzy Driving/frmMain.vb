@@ -10,6 +10,7 @@ Public Class frmMain
     'Private xinputController As Controller
 
     Private driveMode As String = DriveStates.PARK
+    Private instructedMode As String = DriveStates.PARK
 
     'Private lastShiftTime As DateTime = DateTime.MinValue
     Private zLocked As Boolean = False 'allows for shift events to start and end
@@ -37,7 +38,57 @@ Public Class frmMain
     Private nextInstructionCountDown As Long = -1
     Private pollTimer As New Timer()
 
+    Private outFile As System.IO.StreamWriter
+    Private outStepCounter As Integer = 0
+
     Private Sub frmMain_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        ''''process inputs first
+        'set up the output file
+        Dim participantID As String = InputBox("Please enter the participant ID:", "Participant ID")
+        Dim timestamp As String = DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss")
+        Dim filePath As String = System.IO.Path.Combine(Application.StartupPath, $"{participantID}_{timestamp}.txt")
+        outFile = New System.IO.StreamWriter(filePath, True)
+
+        Dim initialData As New Dictionary(Of String, String)()
+        initialData.Add(NameOf(participantID), participantID)
+        initialData.Add(NameOf(timestamp), timestamp)
+        WriteData(Instruction.WAIT, initialData)
+
+        With instructions
+            .Enqueue(Instruction.GET_MSG_REVERSE)
+            .Enqueue(Instruction.GO_DRIVE)
+            .Enqueue(Instruction.GET_DEMOGRAPHICS)
+            .Enqueue(Instruction.GO_OPEN)
+            .Enqueue(Instruction.GET_MSG_BREAK)
+            .Enqueue(Instruction.GET_SURPRISE)
+            .Enqueue(Instruction.GO_REVERSE)
+            .Enqueue(Instruction.GO_GAS)
+            .Enqueue(Instruction.GO_NEUTRAL)
+            .Enqueue(Instruction.GO_GAS_LONG)
+            .Enqueue(Instruction.GO_DRIVE)
+            .Enqueue(Instruction.GO_GAS)
+            .Enqueue(Instruction.GO_PARK)
+            .Enqueue(Instruction.GO_GAS)
+            .Enqueue(Instruction.GET_STATE)
+            .Enqueue(Instruction.GET_UP1)
+            .Enqueue(Instruction.GET_UP2)
+            .Enqueue(Instruction.GET_UP3)
+            .Enqueue(Instruction.GET_DOWN1)
+            .Enqueue(Instruction.GET_DOWN2)
+            .Enqueue(Instruction.GET_DOWN3)
+            .Enqueue(Instruction.GET_GAS)
+            .Enqueue(Instruction.GET_MSG_END)
+        End With
+
+        Dim firstStep As Integer = CInt(InputBox("Please enter the step to start on:", "First Step", "1"))
+        For i = 1 To firstStep - 1
+            outStepCounter += 1
+            instructions.Dequeue()
+        Next i
+
+        MsgBox($"Starting the experiment with participant {participantID} at step {firstStep}. Click 'Ok' when you are ready to start.")
+
+        'set everything else up
         originalImage = picWheel.Image
         shiftDefaultTop = picShifter.Top
 
@@ -92,7 +143,7 @@ Public Class frmMain
         joystick.Properties.BufferSize = 128
         joystick.Acquire()
 
-        ' Start polling (for demo, use a timer)
+        ' Start polling 
         AddHandler pollTimer.Tick, AddressOf PollJoystick
         pollTimer.Interval = 50
         pollTimer.Start()
@@ -114,10 +165,10 @@ Public Class frmMain
         'Me.Text = buttons(8).ToString & " " & buttons(9).ToString
         Dim driveButton = state.Z < 30000
 
-        If driveButton And lblDriveMode.Text = DriveStates.DRIVE Then
+        If driveButton And driveMode = DriveStates.DRIVE Then
             timerStepCount = 1
             steerChange = -1 * steerMax * (x - axisMax / 2) / axisMax
-        ElseIf driveButton And lblDriveMode.Text = DriveStates.REVERSE Then
+        ElseIf driveButton And driveMode = DriveStates.REVERSE Then
             timerStepCount = -1
             steerChange = steerMax * (x - axisMax / 2) / axisMax
         Else
@@ -146,43 +197,71 @@ Public Class frmMain
 
         'deal with instructions if any
         'if the last instruction has been satisfied, set countdown
-        If nextInstructionCountDown = 0 Then
-            'do nothing
-            Dim j As Index
-            j = 0
-        End If
         If lblInstructions.Text = Instruction.WAIT And instructions.Count > 0 Then
-            lblInstructions.Text = instructions.Peek()
-            instructions.Dequeue()
-            Interaction.Beep()
-        Else
-            If nextInstructionCountDown < 0 And (((lblInstructions.Text = Instruction.GO_GAS And driveButton) Or (driveMode = instructionToDriveState()))) Then
-                nextInstructionCountDown = 10
-            End If
-            If nextInstructionCountDown = 0 Then
-                If instructions.Count > 0 Then
+            nextInstructionCountDown = 0
+        End If
+        'If lblInstructions.Text = Instruction.WAIT And instructions.Count > 0 Then
+        '    lblInstructions.Text = instructions.Peek()
+        '    If lblInstructions.Text = Instruction.GO_OPEN Then
+        '        nextInstructionCountDown = Instruction.GetTickCount(lblInstructions.Text)
+        '    End If
+        '    WriteData(instructions.Peek())
+        '    instructions.Dequeue()
+        '    Interaction.Beep()
+        'Else
+        If nextInstructionCountDown < 0 And ((
+                (Instruction.IsGasInstruction(lblInstructions.Text) And driveButton) Or
+                (driveMode = instructionToDriveState())
+            )) Then
+            nextInstructionCountDown = Instruction.GetTickCount(lblInstructions.Text)
+        ElseIf nextInstructionCountDown = 0 Then
+            If instructions.Count > 0 Then
+                If Instruction.IsGet(instructions.Peek()) Then
+                    Dim results As Dictionary(Of String, String) = Nothing
+                    pollTimer.Stop()
                     If instructions.Peek() = Instruction.GET_STATE Then
-                        pollTimer.Stop()
-                        Dim results As Dictionary(Of String, String) = GetFuzzyState(instructions.Peek())
-                        'process results here
-                        pollTimer.Start()
-                    ElseIf Instruction.IsInputRequest(instructions.Peek()) Then
-                        pollTimer.Stop()
-                        Dim results As Dictionary(Of String, String) = GetFuzzyInput(instructions.Peek())
-                        'process results here
-                        pollTimer.Start()
+                        results = GetFuzzyState()
+                    ElseIf Instruction.IsGetInputRequest(instructions.Peek()) Then
+                        results = GetFuzzyInput(instructions.Peek())
+                    ElseIf instructions.Peek() = Instruction.GET_DEMOGRAPHICS Then
+                        results = GetDemographics()
+                    ElseIf instructions.Peek() = Instruction.GET_SURPRISE Then
+                        results = GetSurprise()
+                    ElseIf Instruction.IsMessage(instructions.Peek()) Then
+                        MsgBox(instructions.Peek(), MsgBoxStyle.Information, "")
+                        Dim nextMode As String = MsgToDriveState(instructions.Peek())
+                        If nextMode <> "" Then
+                            SetDriveMode(nextMode)
+                        End If
                     Else
-                        lblInstructions.Text = instructions.Peek()
+                        'should never get here
                     End If
+                    WriteData(instructions.Peek(), results)
+                    instructions.Dequeue()
+                    pollTimer.Start()
+                End If
+                If instructions.Count > 0 AndAlso Instruction.IsInstruction(instructions.Peek()) Then
+                    lblInstructions.Text = instructions.Peek()
+                    If instructionToDriveState() <> "" Then
+                        instructedMode = instructionToDriveState()
+                        lblAssigned.Text = instructedMode
+                    End If
+                    If lblInstructions.Text = Instruction.GO_OPEN Then
+                        nextInstructionCountDown = Instruction.GetTickCount(lblInstructions.Text)
+                    End If
+                    WriteData(instructions.Peek())
                     instructions.Dequeue()
                     Interaction.Beep()
                 Else
-                    lblInstructions.Text = Instruction.WAIT
+                    nextInstructionCountDown += 1 '
                 End If
+            Else
+                lblInstructions.Text = Instruction.WAIT
             End If
         End If
+        'End If
         nextInstructionCountDown = Math.Max(nextInstructionCountDown - 1, -1)
-        TextBox1.Text = CStr(z)
+        TextBox1.Text = CStr(nextInstructionCountDown)
     End Sub
 
     Private Function instructionToDriveState() As String
@@ -200,31 +279,49 @@ Public Class frmMain
         End Select
     End Function
 
+    Private Function MsgToDriveState(msg As String) As String
+        Select Case msg
+            Case Instruction.GET_MSG_PARK
+                Return DriveStates.PARK
+            Case Instruction.GET_MSG_REVERSE
+                Return DriveStates.REVERSE
+            Case Instruction.GET_MSG_NEUTRAL
+                Return DriveStates.NEUTRAL
+            Case Instruction.GET_MSG_DRIVE
+                Return DriveStates.DRIVE
+            Case Else
+                Return ""
+        End Select
+    End Function
+
     Private Sub ShiftUp()
         Select Case driveMode
             Case DriveStates.PARK
-                driveMode = DriveStates.PARK
+                SetDriveMode(DriveStates.PARK)
             Case DriveStates.REVERSE
-                driveMode = DriveStates.PARK
+                SetDriveMode(DriveStates.PARK)
             Case DriveStates.NEUTRAL
-                driveMode = DriveStates.REVERSE
+                SetDriveMode(DriveStates.REVERSE)
             Case DriveStates.DRIVE
-                driveMode = DriveStates.NEUTRAL
+                SetDriveMode(DriveStates.NEUTRAL)
         End Select
-        lblDriveMode.Text = driveMode
     End Sub
 
     Private Sub ShiftDown()
         Select Case driveMode
             Case DriveStates.PARK
-                driveMode = DriveStates.REVERSE
+                SetDriveMode(DriveStates.REVERSE)
             Case DriveStates.REVERSE
-                driveMode = DriveStates.NEUTRAL
+                SetDriveMode(DriveStates.NEUTRAL)
             Case DriveStates.NEUTRAL
-                driveMode = DriveStates.DRIVE
+                SetDriveMode(DriveStates.DRIVE)
             Case DriveStates.DRIVE
-                driveMode = DriveStates.DRIVE
+                SetDriveMode(DriveStates.DRIVE)
         End Select
+    End Sub
+
+    Private Sub SetDriveMode(newMode As String)
+        driveMode = newMode
         lblDriveMode.Text = driveMode
     End Sub
 
@@ -254,14 +351,14 @@ Public Class frmMain
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
-        MsgBox(GetFuzzyState("").Item(DriveStates.REVERSE))
+        MsgBox(GetFuzzyState().Item(DriveStates.REVERSE))
     End Sub
 
     Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
         MsgBox(GetFuzzyInput(TransmissionInput.UP1).Item(TransmissionInput.UP1))
     End Sub
 
-    Private Function GetFuzzyState(message As String) As Dictionary(Of String, String)
+    Private Function GetFuzzyState(Optional message As String = "") As Dictionary(Of String, String)
         'Use the sliders to indicate the deree to which the transimision is in each of the following states.
         If message <> "" Then
             frmFuzzyState.SetLabelMessage(message)
@@ -330,17 +427,29 @@ Public Class frmMain
         End If
     End Function
 
+    Private Sub WriteData(inst As String, Optional theData As Dictionary(Of String, String) = Nothing)
+        Dim outString As String = CStr(outStepCounter) + "," + Instruction.GetInstrunctionName(inst)
+        If theData IsNot Nothing Then
+            outString += "," + String.Join(",", theData.Select(Function(kvp) $"{kvp.Key}:{kvp.Value}"))
+        End If
+        outString += $",ActualState:{driveMode},InstructedState:{instructedMode}"
+        outFile.WriteLine(outString)
+        outStepCounter += 1
+    End Sub
+
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+        instructions.Enqueue(Instruction.GO_OPEN)
+        instructions.Enqueue(Instruction.GET_MSG_BREAK)
         instructions.Enqueue(Instruction.GO_REVERSE)
         instructions.Enqueue(Instruction.GO_GAS)
         instructions.Enqueue(Instruction.GO_NEUTRAL)
-        instructions.Enqueue(Instruction.GO_GAS)
+        instructions.Enqueue(Instruction.GO_GAS_LONG)
         instructions.Enqueue(Instruction.GO_DRIVE)
         instructions.Enqueue(Instruction.GO_GAS)
         instructions.Enqueue(Instruction.GO_PARK)
         instructions.Enqueue(Instruction.GO_GAS)
         instructions.Enqueue(Instruction.GET_STATE)
-
+        instructions.Enqueue(Instruction.GET_MSG_END)
     End Sub
 
     Private Sub frmMain_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
@@ -350,14 +459,35 @@ Public Class frmMain
     End Sub
 
     Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
-        MsgBox(GetFuzzyState("Assume that you know that the car is in (D) Drive and you know that input Up × 1 occured and was recognized by the system. Use the sliders to indicate the degree to which you think this will put the car into each of the following states.").Item(DriveStates.REVERSE))
+        GetFuzzyState("Some text")
     End Sub
 
     Private Sub Button5_Click(sender As Object, e As EventArgs) Handles Button5.Click
         GetDemographics()
     End Sub
 
-    Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click
+    Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button5.Click
         GetSurprise()
     End Sub
+
+    Private Sub frmMain_FormClosed(sender As Object, e As FormClosedEventArgs) Handles Me.FormClosed
+        If outFile IsNot Nothing Then
+            outFile.Close()
+            outFile.Dispose()
+        End If
+
+        If joystick IsNot Nothing Then
+            Try
+                joystick.Unacquire()
+                joystick.Dispose()
+            Catch ex As Exception
+                ' Catch any exceptions in case the joystick was pulled out mid-use
+            End Try
+        End If
+
+        If directInput IsNot Nothing Then
+            directInput.Dispose()
+        End If
+    End Sub
+
 End Class
