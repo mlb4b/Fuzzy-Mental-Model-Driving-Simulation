@@ -96,10 +96,10 @@ Partial Class frmMain
         ' 
         lblInstructions.BackColor = SystemColors.GradientInactiveCaption
         lblInstructions.BorderStyle = BorderStyle.FixedSingle
-        lblInstructions.Font = New Font("Segoe UI", 12.0F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
-        lblInstructions.Location = New Point(981, 806)
+        lblInstructions.Font = New Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
+        lblInstructions.Location = New Point(981, 735)
         lblInstructions.Name = "lblInstructions"
-        lblInstructions.Size = New Size(273, 136)
+        lblInstructions.Size = New Size(273, 287)
         lblInstructions.TabIndex = 6
         lblInstructions.Text = "Wait for instructions"
         lblInstructions.TextAlign = ContentAlignment.MiddleCenter
@@ -204,7 +204,7 @@ Partial Class frmMain
         ' 
         ' frmMain
         ' 
-        AutoScaleDimensions = New SizeF(13.0F, 32.0F)
+        AutoScaleDimensions = New SizeF(13F, 32F)
         AutoScaleMode = AutoScaleMode.Font
         ClientSize = New Size(2059, 1333)
         Controls.Add(GroupBox1)

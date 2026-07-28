@@ -125,7 +125,7 @@ Partial Class frmFuzzyState
         lblMessage.Size = New Size(1284, 79)
         lblMessage.TabIndex = 6
         lblMessage.TabStop = False
-        lblMessage.Text = "Use the sliders to indicate the deree to which you think the car is in each of the following states."
+        lblMessage.Text = "Use the sliders to indicate the degree to which you think the car is in each of the following states."
         ' 
         ' frmFuzzyState
         ' 

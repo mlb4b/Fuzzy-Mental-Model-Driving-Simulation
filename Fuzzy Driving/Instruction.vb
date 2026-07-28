@@ -4,6 +4,7 @@ Public Class Instruction
     Public Const GO_PARK As String = "Put the car in Park"
     Public Const GO_NEUTRAL As String = "Put the car in Neutral"
     Public Const GO_REVERSE As String = "Put the car in Reverse"
+    Public Const GO_REVERSE_SPECIAL As String = "Put the car in Reverse " 'the extra space is necessary
     Public Const GO_DRIVE As String = "Put the car in Drive"
     Public Const GO_GAS As String = "Apply the gas"
     Public Const GO_GAS_LONG As String = "Apply the gas for a while"
@@ -69,7 +70,7 @@ Public Class Instruction
             Case GO_GAS_LONG
                 Return 300
             Case GO_OPEN
-                Return 100
+                Return 500
             Case Else
                 Return 10
         End Select

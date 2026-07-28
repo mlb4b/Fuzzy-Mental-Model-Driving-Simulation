@@ -22,7 +22,10 @@ Public Class frmMain
     Private originalImage As Image
     Private shiftDefaultTop As Integer
     Private maxShiftTop As Integer = 200
-    Private failureRate As Double = 0.5
+    Private failureRate As Double = 0.1
+    Private goToDrive As Boolean = False
+    Private lastInstruction As String = ""
+    Private revertCommand As Boolean = False
 
     Private animationFrames() As Image
     Private currentFrameIndex As Integer = 0
@@ -55,33 +58,224 @@ Public Class frmMain
         WriteData(Instruction.WAIT, initialData)
 
         With instructions
-            .Enqueue(Instruction.GET_MSG_REVERSE)
-            .Enqueue(Instruction.GO_DRIVE)
-            .Enqueue(Instruction.GET_DEMOGRAPHICS)
-            .Enqueue(Instruction.GO_OPEN)
-            .Enqueue(Instruction.GET_MSG_BREAK)
-            .Enqueue(Instruction.GET_SURPRISE)
-            .Enqueue(Instruction.GO_REVERSE)
-            .Enqueue(Instruction.GO_GAS)
-            .Enqueue(Instruction.GO_NEUTRAL)
-            .Enqueue(Instruction.GO_GAS_LONG)
-            .Enqueue(Instruction.GO_DRIVE)
-            .Enqueue(Instruction.GO_GAS)
-            .Enqueue(Instruction.GO_PARK)
-            .Enqueue(Instruction.GO_GAS)
-            .Enqueue(Instruction.GET_STATE)
-            .Enqueue(Instruction.GET_UP1)
-            .Enqueue(Instruction.GET_UP2)
-            .Enqueue(Instruction.GET_UP3)
-            .Enqueue(Instruction.GET_DOWN1)
-            .Enqueue(Instruction.GET_DOWN2)
-            .Enqueue(Instruction.GET_DOWN3)
-            .Enqueue(Instruction.GET_GAS)
-            .Enqueue(Instruction.GET_MSG_END)
+            .Enqueue(Instruction.GET_DEMOGRAPHICS) 'step 1
+            .Enqueue(Instruction.GET_MSG_BEGIN) 'step 2
+            .Enqueue(Instruction.GO_OPEN) 'step 3
+            .Enqueue(Instruction.GET_MSG_PARK) 'step 4
+            .Enqueue(Instruction.GO_DRIVE) 'step 5
+            .Enqueue(Instruction.GO_GAS) 'step 6
+            .Enqueue(Instruction.GO_REVERSE) 'step 7
+            .Enqueue(Instruction.GO_GAS) 'step 8
+            .Enqueue(Instruction.GO_NEUTRAL) 'step 9
+            .Enqueue(Instruction.GO_GAS) 'step 10
+            .Enqueue(Instruction.GO_PARK) 'step 11
+            .Enqueue(Instruction.GO_GAS) 'step 12
+            .Enqueue(Instruction.GO_REVERSE) 'step 13
+            .Enqueue(Instruction.GO_GAS) 'step 14
+            .Enqueue(Instruction.GO_DRIVE) 'step 15
+            .Enqueue(Instruction.GO_GAS) 'step 16
+            .Enqueue(Instruction.GO_NEUTRAL) 'step 17
+            .Enqueue(Instruction.GO_GAS) 'step 18
+            .Enqueue(Instruction.GO_REVERSE) 'step 19
+            .Enqueue(Instruction.GO_GAS) 'step 20
+            .Enqueue(Instruction.GO_PARK) 'step 21
+            .Enqueue(Instruction.GO_GAS) 'step 22
+            .Enqueue(Instruction.GO_NEUTRAL) 'step 23
+            .Enqueue(Instruction.GO_GAS) 'step 24
+            .Enqueue(Instruction.GO_DRIVE) 'step 25
+            .Enqueue(Instruction.GO_GAS) 'step 26
+            .Enqueue(Instruction.GO_PARK) 'step 27
+            .Enqueue(Instruction.GO_GAS) 'step 28
+            .Enqueue(Instruction.GET_MSG_REVERSE) 'step 29
+            .Enqueue(Instruction.GO_PARK) 'step 30
+            .Enqueue(Instruction.GO_GAS) 'step 31
+            .Enqueue(Instruction.GO_NEUTRAL) 'step 32
+            .Enqueue(Instruction.GO_GAS) 'step 33
+            .Enqueue(Instruction.GO_REVERSE) 'step 34
+            .Enqueue(Instruction.GO_GAS) 'step 35
+            .Enqueue(Instruction.GO_DRIVE) 'step 36
+            .Enqueue(Instruction.GO_GAS) 'step 37
+            .Enqueue(Instruction.GO_PARK) 'step 38
+            .Enqueue(Instruction.GO_GAS) 'step 39
+            .Enqueue(Instruction.GO_DRIVE) 'step 40
+            .Enqueue(Instruction.GO_GAS) 'step 41
+            .Enqueue(Instruction.GO_NEUTRAL) 'step 42
+            .Enqueue(Instruction.GO_GAS) 'step 43
+            .Enqueue(Instruction.GO_PARK) 'step 44
+            .Enqueue(Instruction.GO_GAS) 'step 45
+            .Enqueue(Instruction.GO_REVERSE) 'step 46
+            .Enqueue(Instruction.GO_GAS) 'step 47
+            .Enqueue(Instruction.GO_NEUTRAL) 'step 48
+            .Enqueue(Instruction.GO_GAS) 'step 49
+            .Enqueue(Instruction.GO_DRIVE) 'step 50
+            .Enqueue(Instruction.GO_GAS) 'step 51
+            .Enqueue(Instruction.GO_REVERSE) 'step 52
+            .Enqueue(Instruction.GO_GAS) 'step 53
+            .Enqueue(Instruction.GET_MSG_DRIVE) 'step 54
+            .Enqueue(Instruction.GO_NEUTRAL) 'step 55
+            .Enqueue(Instruction.GO_GAS) 'step 56
+            .Enqueue(Instruction.GO_PARK) 'step 57
+            .Enqueue(Instruction.GO_GAS) 'step 58
+            .Enqueue(Instruction.GO_REVERSE) 'step 59
+            .Enqueue(Instruction.GO_GAS) 'step 60
+            .Enqueue(Instruction.GO_NEUTRAL) 'step 61
+            .Enqueue(Instruction.GO_GAS) 'step 62
+            .Enqueue(Instruction.GO_DRIVE) 'step 63
+            .Enqueue(Instruction.GO_GAS) 'step 64
+            .Enqueue(Instruction.GO_REVERSE) 'step 65
+            .Enqueue(Instruction.GO_GAS) 'step 66
+            .Enqueue(Instruction.GO_PARK) 'step 67
+            .Enqueue(Instruction.GO_GAS) 'step 68
+            .Enqueue(Instruction.GO_NEUTRAL) 'step 69
+            .Enqueue(Instruction.GO_GAS) 'step 70
+            .Enqueue(Instruction.GO_REVERSE) 'step 71
+            .Enqueue(Instruction.GO_GAS) 'step 72
+            .Enqueue(Instruction.GO_DRIVE) 'step 73
+            .Enqueue(Instruction.GO_GAS) 'step 74
+            .Enqueue(Instruction.GO_PARK) 'step 75
+            .Enqueue(Instruction.GO_GAS) 'step 76
+            .Enqueue(Instruction.GO_DRIVE) 'step 77
+            .Enqueue(Instruction.GO_GAS) 'step 78
+            .Enqueue(Instruction.GET_UP1) 'step 79
+            .Enqueue(Instruction.GET_UP2) 'step 80
+            .Enqueue(Instruction.GET_UP3) 'step 81
+            .Enqueue(Instruction.GET_DOWN1) 'step 82
+            .Enqueue(Instruction.GET_DOWN2) 'step 83
+            .Enqueue(Instruction.GET_DOWN3) 'step 84
+            .Enqueue(Instruction.GET_GAS) 'step 85
+            .Enqueue(Instruction.GET_MSG_BREAK) 'step 86
+            .Enqueue(Instruction.GET_MSG_PARK) 'step 87
+            .Enqueue(Instruction.GO_REVERSE) 'step 88
+            .Enqueue(Instruction.GET_STATE) 'step 89
+            .Enqueue(Instruction.GET_MSG_REVERSE) 'step 90
+            .Enqueue(Instruction.GO_NEUTRAL) 'step 91
+            .Enqueue(Instruction.GET_STATE) 'step 92
+            .Enqueue(Instruction.GET_MSG_NEUTRAL) 'step 93
+            .Enqueue(Instruction.GO_PARK) 'step 94
+            .Enqueue(Instruction.GET_STATE) 'step 95
+            .Enqueue(Instruction.GET_MSG_PARK) 'step 96
+            .Enqueue(Instruction.GO_REVERSE) 'step 97
+            .Enqueue(Instruction.GET_STATE) 'step 98
+            .Enqueue(Instruction.GET_MSG_REVERSE) 'step 99
+            .Enqueue(Instruction.GO_DRIVE) 'step 100
+            .Enqueue(Instruction.GET_STATE) 'step 101
+            .Enqueue(Instruction.GET_MSG_DRIVE) 'step 102
+            .Enqueue(Instruction.GO_NEUTRAL) 'step 103
+            .Enqueue(Instruction.GET_STATE) 'step 104
+            .Enqueue(Instruction.GET_MSG_NEUTRAL) 'step 105
+            .Enqueue(Instruction.GO_REVERSE) 'step 106
+            .Enqueue(Instruction.GET_STATE) 'step 107
+            .Enqueue(Instruction.GET_MSG_REVERSE) 'step 108
+            .Enqueue(Instruction.GO_PARK) 'step 109
+            .Enqueue(Instruction.GET_STATE) 'step 110
+            .Enqueue(Instruction.GET_MSG_PARK) 'step 111
+            .Enqueue(Instruction.GO_NEUTRAL) 'step 112
+            .Enqueue(Instruction.GET_STATE) 'step 113
+            .Enqueue(Instruction.GET_MSG_NEUTRAL) 'step 114
+            .Enqueue(Instruction.GO_DRIVE) 'step 115
+            .Enqueue(Instruction.GET_STATE) 'step 116
+            .Enqueue(Instruction.GET_MSG_DRIVE) 'step 117
+            .Enqueue(Instruction.GO_PARK) 'step 118
+            .Enqueue(Instruction.GET_STATE) 'step 119
+            .Enqueue(Instruction.GET_MSG_PARK) 'step 120
+            .Enqueue(Instruction.GO_DRIVE) 'step 121
+            .Enqueue(Instruction.GET_STATE) 'step 122
+            .Enqueue(Instruction.GET_MSG_DRIVE) 'step 123
+            .Enqueue(Instruction.GO_REVERSE) 'step 124
+            .Enqueue(Instruction.GET_STATE) 'step 125
+            .Enqueue(Instruction.GET_MSG_REVERSE) 'step 126
+            .Enqueue(Instruction.GO_NEUTRAL) 'step 127
+            .Enqueue(Instruction.GET_STATE) 'step 128
+            .Enqueue(Instruction.GET_MSG_NEUTRAL) 'step 129
+            .Enqueue(Instruction.GO_PARK) 'step 130
+            .Enqueue(Instruction.GET_STATE) 'step 131
+            .Enqueue(Instruction.GET_MSG_BREAK) 'step 132
+            .Enqueue(Instruction.GET_MSG_NEUTRAL) 'step 133
+            .Enqueue(Instruction.GO_PARK) 'step 134
+            .Enqueue(Instruction.GO_GAS) 'step 135
+            .Enqueue(Instruction.GET_SURPRISE) 'step 136
+            .Enqueue(Instruction.GET_MSG_PARK) 'step 137
+            .Enqueue(Instruction.GO_REVERSE) 'step 138
+            .Enqueue(Instruction.GO_GAS) 'step 139
+            .Enqueue(Instruction.GET_SURPRISE) 'step 140
+            .Enqueue(Instruction.GET_MSG_REVERSE) 'step 141
+            .Enqueue(Instruction.GO_NEUTRAL) 'step 142
+            .Enqueue(Instruction.GO_GAS) 'step 143
+            .Enqueue(Instruction.GET_SURPRISE) 'step 144
+            .Enqueue(Instruction.GET_MSG_NEUTRAL) 'step 145
+            .Enqueue(Instruction.GO_DRIVE) 'step 146
+            .Enqueue(Instruction.GO_GAS) 'step 147
+            .Enqueue(Instruction.GET_SURPRISE) 'step 148
+            .Enqueue(Instruction.GET_MSG_DRIVE) 'step 149
+            .Enqueue(Instruction.GO_REVERSE) 'step 150
+            .Enqueue(Instruction.GO_GAS) 'step 151
+            .Enqueue(Instruction.GET_SURPRISE) 'step 152
+            .Enqueue(Instruction.GET_MSG_REVERSE) 'step 153
+            .Enqueue(Instruction.GO_PARK) 'step 154
+            .Enqueue(Instruction.GO_GAS) 'step 155
+            .Enqueue(Instruction.GET_SURPRISE) 'step 156
+            .Enqueue(Instruction.GET_MSG_PARK) 'step 157
+            .Enqueue(Instruction.GO_NEUTRAL) 'step 158
+            .Enqueue(Instruction.GO_GAS) 'step 159
+            .Enqueue(Instruction.GET_SURPRISE) 'step 160
+            .Enqueue(Instruction.GET_MSG_NEUTRAL) 'step 161
+            .Enqueue(Instruction.GO_REVERSE) 'step 162
+            .Enqueue(Instruction.GO_GAS) 'step 163
+            .Enqueue(Instruction.GET_SURPRISE) 'step 164
+            .Enqueue(Instruction.GET_MSG_REVERSE) 'step 165
+            .Enqueue(Instruction.GO_DRIVE) 'step 166
+            .Enqueue(Instruction.GO_GAS) 'step 167
+            .Enqueue(Instruction.GET_SURPRISE) 'step 168
+            .Enqueue(Instruction.GET_MSG_DRIVE) 'step 169
+            .Enqueue(Instruction.GO_PARK) 'step 170
+            .Enqueue(Instruction.GO_GAS) 'step 171
+            .Enqueue(Instruction.GET_SURPRISE) 'step 172
+            .Enqueue(Instruction.GET_MSG_PARK) 'step 173
+            .Enqueue(Instruction.GO_DRIVE) 'step 174
+            .Enqueue(Instruction.GO_GAS) 'step 175
+            .Enqueue(Instruction.GET_SURPRISE) 'step 176
+            .Enqueue(Instruction.GET_MSG_DRIVE) 'step 177
+            .Enqueue(Instruction.GO_NEUTRAL) 'step 178
+            .Enqueue(Instruction.GO_GAS) 'step 179
+            .Enqueue(Instruction.GET_SURPRISE) 'step 180
+            .Enqueue(Instruction.GET_MSG_NEUTRAL) 'step 181
+            .Enqueue(Instruction.GO_REVERSE_SPECIAL) 'step 182
+            .Enqueue(Instruction.GO_GAS) 'step 183
+            .Enqueue(Instruction.GET_MSG_NEUTRAL) 'step 184
+            .Enqueue(Instruction.GET_MSG_END) 'step 184
+
+            ' this is old stuff
+            '.Enqueue(Instruction.GO_OPEN)
+            '.Enqueue(Instruction.GET_MSG_NEUTRAL)
+            '.Enqueue(Instruction.GO_REVERSE_SPECIAL)
+            '.Enqueue(Instruction.GO_GAS)
+            '.Enqueue(Instruction.GET_MSG_REVERSE)
+            '.Enqueue(Instruction.GO_DRIVE)
+            '.Enqueue(Instruction.GET_DEMOGRAPHICS)
+            '.Enqueue(Instruction.GO_OPEN)
+            '.Enqueue(Instruction.GET_MSG_BREAK)
+            '.Enqueue(Instruction.GET_SURPRISE)
+            '.Enqueue(Instruction.GO_REVERSE)
+            '.Enqueue(Instruction.GO_GAS)
+            '.Enqueue(Instruction.GO_NEUTRAL)
+            '.Enqueue(Instruction.GO_GAS_LONG)
+            '.Enqueue(Instruction.GO_DRIVE)
+            '.Enqueue(Instruction.GO_GAS)
+            '.Enqueue(Instruction.GO_PARK)
+            '.Enqueue(Instruction.GO_GAS)
+            '.Enqueue(Instruction.GET_STATE)
+            '.Enqueue(Instruction.GET_UP1)
+            '.Enqueue(Instruction.GET_UP2)
+            '.Enqueue(Instruction.GET_UP3)
+            '.Enqueue(Instruction.GET_DOWN1)
+            '.Enqueue(Instruction.GET_DOWN2)
+            '.Enqueue(Instruction.GET_DOWN3)
+            '.Enqueue(Instruction.GET_GAS)
+            '.Enqueue(Instruction.GET_MSG_END)
         End With
 
         Dim firstStep As Integer = CInt(InputBox("Please enter the step to start on:", "First Step", "1"))
-        For i = 1 To firstStep - 1
+        For i = 1 To firstStep - 1 'dequeues the instructions to get to the start 
             outStepCounter += 1
             instructions.Dequeue()
         Next i
@@ -165,7 +359,7 @@ Public Class frmMain
         'Me.Text = buttons(8).ToString & " " & buttons(9).ToString
         Dim driveButton = state.Z < 30000
 
-        If driveButton And driveMode = DriveStates.DRIVE Then
+        If driveButton And (driveMode = DriveStates.DRIVE Or goToDrive) Then
             timerStepCount = 1
             steerChange = -1 * steerMax * (x - axisMax / 2) / axisMax
         ElseIf driveButton And driveMode = DriveStates.REVERSE Then
@@ -178,8 +372,18 @@ Public Class frmMain
 
         Dim now = DateTime.Now
 
-        If Not zLocked And ((now - lastShiftTime).TotalMilliseconds >= shiftCooldown) And (Rnd() > failureRate) Then
-            If z < zMin + zSlop Then
+        Dim failToShift As Boolean = Rnd() < failureRate
+        If Not zLocked And ((now - lastShiftTime).TotalMilliseconds >= shiftCooldown) Then
+            'If goToDrive And ((z < zMin + zSlop) Or (z > axisMax - zSlop)) Then
+            '    zLocked = True
+            '    SetDriveMode(DriveStates.DRIVE)
+            '    lastShiftTime = now
+            '    goToDrive = False
+            'Else
+            If failToShift And ((z < zMin + zSlop) Or (z > axisMax - zSlop)) Then
+                zLocked = True
+                lastShiftTime = now
+            ElseIf z < zMin + zSlop Then
                 zLocked = True
                 ShiftUp()
                 lastShiftTime = now
@@ -200,75 +404,88 @@ Public Class frmMain
         If lblInstructions.Text = Instruction.WAIT And instructions.Count > 0 Then
             nextInstructionCountDown = 0
         End If
-        'If lblInstructions.Text = Instruction.WAIT And instructions.Count > 0 Then
-        '    lblInstructions.Text = instructions.Peek()
-        '    If lblInstructions.Text = Instruction.GO_OPEN Then
-        '        nextInstructionCountDown = Instruction.GetTickCount(lblInstructions.Text)
-        '    End If
-        '    WriteData(instructions.Peek())
-        '    instructions.Dequeue()
-        '    Interaction.Beep()
-        'Else
-        If nextInstructionCountDown < 0 And ((
+        If Instruction.IsGasInstruction(lblInstructions.Text) And instructedMode <> driveMode Then
+            lastInstruction = If(lblInstructions.Text <> DriveStateToInstruction(instructedMode), lblInstructions.Text, lastInstruction)
+            lblInstructions.Text = DriveStateToInstruction(instructedMode)
+            revertCommand = True
+            'Private lastInstruction As String = ""
+            'Private revertCommand As Boolean = False
+        ElseIf revertCommand And instructedMode = driveMode Then
+            lblInstructions.Text = lastInstruction
+            lastInstruction = ""
+            revertCommand = False
+        Else
+            If nextInstructionCountDown < 0 And ((
                 (Instruction.IsGasInstruction(lblInstructions.Text) And driveButton) Or
                 (driveMode = instructionToDriveState())
             )) Then
-            nextInstructionCountDown = Instruction.GetTickCount(lblInstructions.Text)
-        ElseIf nextInstructionCountDown = 0 Then
-            If instructions.Count > 0 Then
-                If Instruction.IsGet(instructions.Peek()) Then
-                    Dim results As Dictionary(Of String, String) = Nothing
-                    pollTimer.Stop()
-                    If instructions.Peek() = Instruction.GET_STATE Then
-                        results = GetFuzzyState()
-                    ElseIf Instruction.IsGetInputRequest(instructions.Peek()) Then
-                        results = GetFuzzyInput(instructions.Peek())
-                    ElseIf instructions.Peek() = Instruction.GET_DEMOGRAPHICS Then
-                        results = GetDemographics()
-                    ElseIf instructions.Peek() = Instruction.GET_SURPRISE Then
-                        results = GetSurprise()
-                    ElseIf Instruction.IsMessage(instructions.Peek()) Then
-                        MsgBox(instructions.Peek(), MsgBoxStyle.Information, "")
-                        Dim nextMode As String = MsgToDriveState(instructions.Peek())
-                        If nextMode <> "" Then
-                            SetDriveMode(nextMode)
+                nextInstructionCountDown = Instruction.GetTickCount(lblInstructions.Text)
+            ElseIf nextInstructionCountDown = 0 Then
+                If instructions.Count > 0 Then
+                    If Instruction.IsGet(instructions.Peek()) Then
+                        Dim results As Dictionary(Of String, String) = Nothing
+                        pollTimer.Stop()
+                        If instructions.Peek() = Instruction.GET_STATE Then
+                            results = GetFuzzyState()
+                        ElseIf Instruction.IsGetInputRequest(instructions.Peek()) Then
+                            results = GetFuzzyInput(instructions.Peek())
+                        ElseIf instructions.Peek() = Instruction.GET_DEMOGRAPHICS Then
+                            results = GetDemographics()
+                        ElseIf instructions.Peek() = Instruction.GET_SURPRISE Then
+                            results = GetSurprise()
+                        ElseIf Instruction.IsMessage(instructions.Peek()) Then
+                            MsgBox(instructions.Peek(), MsgBoxStyle.Information, "")
+                            Dim nextMode As String = MsgToDriveState(instructions.Peek())
+                            If nextMode <> "" Then
+                                SetDriveMode(nextMode)
+                            End If
+                        Else
+                            'should never get here
                         End If
+                        WriteData(instructions.Peek(), results)
+                        instructions.Dequeue()
+                        pollTimer.Start()
+                    End If
+                    If instructions.Count > 0 AndAlso Instruction.IsInstruction(instructions.Peek()) Then
+                        lblInstructions.Text = instructions.Peek()
+                        If instructionToDriveState() <> "" Then
+                            instructedMode = instructionToDriveState()
+                            If instructions.Peek() = Instruction.GO_REVERSE_SPECIAL Then
+                                goToDrive = True
+                            ElseIf goToDrive Then
+                                goToDrive = False
+                            End If
+                            lblAssigned.Text = instructedMode
+                        End If
+                        If lblInstructions.Text = Instruction.GO_OPEN Then
+                            nextInstructionCountDown = Instruction.GetTickCount(lblInstructions.Text)
+                        End If
+                        WriteData(instructions.Peek())
+                        instructions.Dequeue()
+                        Interaction.Beep()
                     Else
-                        'should never get here
+                        nextInstructionCountDown += 1 '
                     End If
-                    WriteData(instructions.Peek(), results)
-                    instructions.Dequeue()
-                    pollTimer.Start()
-                End If
-                If instructions.Count > 0 AndAlso Instruction.IsInstruction(instructions.Peek()) Then
-                    lblInstructions.Text = instructions.Peek()
-                    If instructionToDriveState() <> "" Then
-                        instructedMode = instructionToDriveState()
-                        lblAssigned.Text = instructedMode
-                    End If
-                    If lblInstructions.Text = Instruction.GO_OPEN Then
-                        nextInstructionCountDown = Instruction.GetTickCount(lblInstructions.Text)
-                    End If
-                    WriteData(instructions.Peek())
-                    instructions.Dequeue()
-                    Interaction.Beep()
                 Else
-                    nextInstructionCountDown += 1 '
+                    lblInstructions.Text = Instruction.WAIT
                 End If
-            Else
-                lblInstructions.Text = Instruction.WAIT
             End If
+            nextInstructionCountDown = Math.Max(nextInstructionCountDown - 1, -1)
         End If
-        'End If
-        nextInstructionCountDown = Math.Max(nextInstructionCountDown - 1, -1)
         TextBox1.Text = CStr(nextInstructionCountDown)
     End Sub
 
-    Private Function instructionToDriveState() As String
-        Select Case lblInstructions.Text
+    Private Function instructionToDriveState(Optional inst As String = "") As String
+        Dim lookupVal As String
+        If inst = "" Then
+            lookupVal = lblInstructions.Text
+        Else
+            lookupVal = inst
+        End If
+        Select Case lookupVal
             Case Instruction.GO_PARK
                 Return DriveStates.PARK
-            Case Instruction.GO_REVERSE
+            Case Instruction.GO_REVERSE, Instruction.GO_REVERSE_SPECIAL
                 Return DriveStates.REVERSE
             Case Instruction.GO_NEUTRAL
                 Return DriveStates.NEUTRAL
@@ -289,6 +506,21 @@ Public Class frmMain
                 Return DriveStates.NEUTRAL
             Case Instruction.GET_MSG_DRIVE
                 Return DriveStates.DRIVE
+            Case Else
+                Return ""
+        End Select
+    End Function
+
+    Private Function DriveStateToInstruction(state As String) As String
+        Select Case state
+            Case DriveStates.PARK
+                Return Instruction.GO_PARK
+            Case DriveStates.REVERSE
+                Return Instruction.GO_REVERSE
+            Case DriveStates.NEUTRAL
+                Return Instruction.GO_NEUTRAL
+            Case DriveStates.DRIVE
+                Return Instruction.GO_DRIVE
             Case Else
                 Return ""
         End Select
@@ -439,6 +671,9 @@ Public Class frmMain
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
         instructions.Enqueue(Instruction.GO_OPEN)
+        instructions.Enqueue(Instruction.GET_MSG_NEUTRAL)
+        instructions.Enqueue(Instruction.GO_REVERSE_SPECIAL)
+        instructions.Enqueue(Instruction.GO_GAS)
         instructions.Enqueue(Instruction.GET_MSG_BREAK)
         instructions.Enqueue(Instruction.GO_REVERSE)
         instructions.Enqueue(Instruction.GO_GAS)
