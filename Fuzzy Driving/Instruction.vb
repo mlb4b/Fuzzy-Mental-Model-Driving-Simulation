@@ -4,18 +4,24 @@ Public Class Instruction
     Public Const GO_PARK As String = "Put the car in Park"
     Public Const GO_NEUTRAL As String = "Put the car in Neutral"
     Public Const GO_REVERSE As String = "Put the car in Reverse"
-    Public Const GO_REVERSE_SPECIAL As String = "Put the car in Reverse " 'the extra space is necessary
     Public Const GO_DRIVE As String = "Put the car in Drive"
+
+    Public Const GO_PARK_V As String = "Put the car in Park "
+    Public Const GO_NEUTRAL_V As String = "Put the car in Neutral "
+    Public Const GO_REVERSE_V As String = "Put the car in Reverse "
+    Public Const GO_DRIVE_V As String = "Put the car in Drive "
+    Public Const GO_REVERSE_SPECIAL As String = "Put the car in Reverse  " 'the extra space is necessary
+
     Public Const GO_GAS As String = "Apply the gas"
     Public Const GO_GAS_LONG As String = "Apply the gas for a while"
-    Public Const GO_OPEN As String = "Drive around: change drive modes, press the gass, stear, etc."
+    Public Const GO_OPEN As String = "Drive around: change drive modes, press the gas, steer, etc."
     Public Const GET_MSG_END As String = "The experiment is complete. Thank you for your time!"
     Public Const GET_MSG_BREAK As String = "This section of the experiment has finished. You may take a break if you wish. Click on Ok when you are ready to continue."
     Public Const GET_MSG_BEGIN As String = "You are about to begin using the driving simulator. Press 'Ok' when you are ready to start."
     Public Const GET_MSG_PARK As String = "Note, the car has now been put in Park."
     Public Const GET_MSG_NEUTRAL As String = "Note, the car has now been put in Neutral."
     Public Const GET_MSG_REVERSE As String = "Note, the car has now been put in Reverse."
-    Public Const GET_MSG_DRIVE As String = "Note, the car has now been put in Reverse."
+    Public Const GET_MSG_DRIVE As String = "Note, the car has now been put in Drive."
     Public Const GET_STATE As String = "Get state"
     Public Const GET_DEMOGRAPHICS As String = "Get demographics"
     Public Const GET_SURPRISE As String = "Get surprise"
@@ -65,6 +71,14 @@ Public Class Instruction
         Return instruction = GO_GAS OrElse instruction = GO_GAS_LONG
     End Function
 
+    Public Shared Function IsVagueInstruction(instruction As String) As Boolean
+        Return instruction = GO_PARK_V _
+            OrElse instruction = GO_NEUTRAL_V _
+            OrElse instruction = GO_REVERSE_V _
+            OrElse instruction = GO_DRIVE_V _
+            OrElse instruction = GO_REVERSE_SPECIAL
+    End Function
+
     Public Shared Function GetTickCount(instruction As String) As Integer
         Select Case instruction
             Case GO_GAS_LONG
@@ -91,4 +105,6 @@ Public Class Instruction
 
         Return "UNKNOWN_INSTRUCTION" ' Fallback if no matching constant is found
     End Function
+
+
 End Class

@@ -1,6 +1,7 @@
 ﻿Imports System.ComponentModel
 Imports System.Diagnostics.Eventing.Reader
 Imports System.Net.Mail
+Imports System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar
 Imports SharpDX
 Imports SharpDX.DirectInput
 'Imports SharpDX.XInput
@@ -11,6 +12,8 @@ Public Class frmMain
 
     Private driveMode As String = DriveStates.PARK
     Private instructedMode As String = DriveStates.PARK
+    Private selectedMode As String = DriveStates.PARK 'tracks actual inputs
+    Private isVague As Boolean = False
 
     'Private lastShiftTime As DateTime = DateTime.MinValue
     Private zLocked As Boolean = False 'allows for shift events to start and end
@@ -22,7 +25,7 @@ Public Class frmMain
     Private originalImage As Image
     Private shiftDefaultTop As Integer
     Private maxShiftTop As Integer = 200
-    Private failureRate As Double = 0.1
+    Private failureRate As Double = 0.2
     Private goToDrive As Boolean = False
     Private lastInstruction As String = ""
     Private revertCommand As Boolean = False
@@ -145,104 +148,105 @@ Public Class frmMain
             .Enqueue(Instruction.GET_GAS) 'step 85
             .Enqueue(Instruction.GET_MSG_BREAK) 'step 86
             .Enqueue(Instruction.GET_MSG_PARK) 'step 87
-            .Enqueue(Instruction.GO_REVERSE) 'step 88
+            .Enqueue(Instruction.GO_REVERSE_V) 'step 88
             .Enqueue(Instruction.GET_STATE) 'step 89
             .Enqueue(Instruction.GET_MSG_REVERSE) 'step 90
-            .Enqueue(Instruction.GO_NEUTRAL) 'step 91
+            .Enqueue(Instruction.GO_NEUTRAL_V) 'step 91
             .Enqueue(Instruction.GET_STATE) 'step 92
             .Enqueue(Instruction.GET_MSG_NEUTRAL) 'step 93
-            .Enqueue(Instruction.GO_PARK) 'step 94
+            .Enqueue(Instruction.GO_PARK_V) 'step 94
             .Enqueue(Instruction.GET_STATE) 'step 95
             .Enqueue(Instruction.GET_MSG_PARK) 'step 96
-            .Enqueue(Instruction.GO_REVERSE) 'step 97
+            .Enqueue(Instruction.GO_REVERSE_V) 'step 97
             .Enqueue(Instruction.GET_STATE) 'step 98
             .Enqueue(Instruction.GET_MSG_REVERSE) 'step 99
-            .Enqueue(Instruction.GO_DRIVE) 'step 100
+            .Enqueue(Instruction.GO_DRIVE_V) 'step 100
             .Enqueue(Instruction.GET_STATE) 'step 101
             .Enqueue(Instruction.GET_MSG_DRIVE) 'step 102
-            .Enqueue(Instruction.GO_NEUTRAL) 'step 103
+            .Enqueue(Instruction.GO_NEUTRAL_V) 'step 103
             .Enqueue(Instruction.GET_STATE) 'step 104
             .Enqueue(Instruction.GET_MSG_NEUTRAL) 'step 105
-            .Enqueue(Instruction.GO_REVERSE) 'step 106
+            .Enqueue(Instruction.GO_REVERSE_V) 'step 106
             .Enqueue(Instruction.GET_STATE) 'step 107
-            .Enqueue(Instruction.GET_MSG_REVERSE) 'step 108
-            .Enqueue(Instruction.GO_PARK) 'step 109
-            .Enqueue(Instruction.GET_STATE) 'step 110
-            .Enqueue(Instruction.GET_MSG_PARK) 'step 111
-            .Enqueue(Instruction.GO_NEUTRAL) 'step 112
-            .Enqueue(Instruction.GET_STATE) 'step 113
-            .Enqueue(Instruction.GET_MSG_NEUTRAL) 'step 114
-            .Enqueue(Instruction.GO_DRIVE) 'step 115
-            .Enqueue(Instruction.GET_STATE) 'step 116
-            .Enqueue(Instruction.GET_MSG_DRIVE) 'step 117
-            .Enqueue(Instruction.GO_PARK) 'step 118
-            .Enqueue(Instruction.GET_STATE) 'step 119
-            .Enqueue(Instruction.GET_MSG_PARK) 'step 120
-            .Enqueue(Instruction.GO_DRIVE) 'step 121
-            .Enqueue(Instruction.GET_STATE) 'step 122
-            .Enqueue(Instruction.GET_MSG_DRIVE) 'step 123
-            .Enqueue(Instruction.GO_REVERSE) 'step 124
-            .Enqueue(Instruction.GET_STATE) 'step 125
+            .Enqueue(Instruction.GET_MSG_REVERSE) 'step 1
+            .Enqueue(Instruction.GO_PARK_V) 'step 2
+            .Enqueue(Instruction.GET_STATE) 'step 3
+            .Enqueue(Instruction.GET_MSG_PARK) 'step 4
+            .Enqueue(Instruction.GO_NEUTRAL_V) 'step 5
+            .Enqueue(Instruction.GET_STATE) 'step 6
+            .Enqueue(Instruction.GET_MSG_NEUTRAL) 'step 7
+            .Enqueue(Instruction.GO_DRIVE_V) 'step 8
+            .Enqueue(Instruction.GET_STATE) 'step 9
+            .Enqueue(Instruction.GET_MSG_DRIVE) 'step 10
+            .Enqueue(Instruction.GO_PARK_V) 'step 11
+            .Enqueue(Instruction.GET_STATE) 'step 12
+            .Enqueue(Instruction.GET_MSG_PARK) 'step 13
+            .Enqueue(Instruction.GO_DRIVE_V) 'step 14
+            .Enqueue(Instruction.GET_STATE) 'step 15
+            .Enqueue(Instruction.GET_MSG_DRIVE) 'step 16
+            .Enqueue(Instruction.GO_REVERSE_V) 'step 17
+            .Enqueue(Instruction.GET_STATE) 'step 18
             .Enqueue(Instruction.GET_MSG_REVERSE) 'step 126
-            .Enqueue(Instruction.GO_NEUTRAL) 'step 127
+            .Enqueue(Instruction.GO_NEUTRAL_V) 'step 127
             .Enqueue(Instruction.GET_STATE) 'step 128
             .Enqueue(Instruction.GET_MSG_NEUTRAL) 'step 129
-            .Enqueue(Instruction.GO_PARK) 'step 130
+            .Enqueue(Instruction.GO_PARK_V) 'step 130
             .Enqueue(Instruction.GET_STATE) 'step 131
             .Enqueue(Instruction.GET_MSG_BREAK) 'step 132
             .Enqueue(Instruction.GET_MSG_NEUTRAL) 'step 133
-            .Enqueue(Instruction.GO_PARK) 'step 134
+            .Enqueue(Instruction.GO_PARK_V) 'step 134
             .Enqueue(Instruction.GO_GAS) 'step 135
             .Enqueue(Instruction.GET_SURPRISE) 'step 136
             .Enqueue(Instruction.GET_MSG_PARK) 'step 137
-            .Enqueue(Instruction.GO_REVERSE) 'step 138
+            .Enqueue(Instruction.GO_REVERSE_V) 'step 138
             .Enqueue(Instruction.GO_GAS) 'step 139
             .Enqueue(Instruction.GET_SURPRISE) 'step 140
             .Enqueue(Instruction.GET_MSG_REVERSE) 'step 141
-            .Enqueue(Instruction.GO_NEUTRAL) 'step 142
+            .Enqueue(Instruction.GO_NEUTRAL_V) 'step 142
             .Enqueue(Instruction.GO_GAS) 'step 143
             .Enqueue(Instruction.GET_SURPRISE) 'step 144
             .Enqueue(Instruction.GET_MSG_NEUTRAL) 'step 145
-            .Enqueue(Instruction.GO_DRIVE) 'step 146
+            .Enqueue(Instruction.GO_DRIVE_V) 'step 146
             .Enqueue(Instruction.GO_GAS) 'step 147
             .Enqueue(Instruction.GET_SURPRISE) 'step 148
             .Enqueue(Instruction.GET_MSG_DRIVE) 'step 149
-            .Enqueue(Instruction.GO_REVERSE) 'step 150
+            .Enqueue(Instruction.GO_REVERSE_V) 'step 150
             .Enqueue(Instruction.GO_GAS) 'step 151
             .Enqueue(Instruction.GET_SURPRISE) 'step 152
             .Enqueue(Instruction.GET_MSG_REVERSE) 'step 153
-            .Enqueue(Instruction.GO_PARK) 'step 154
+            .Enqueue(Instruction.GO_PARK_V) 'step 154
             .Enqueue(Instruction.GO_GAS) 'step 155
             .Enqueue(Instruction.GET_SURPRISE) 'step 156
             .Enqueue(Instruction.GET_MSG_PARK) 'step 157
-            .Enqueue(Instruction.GO_NEUTRAL) 'step 158
+            .Enqueue(Instruction.GO_NEUTRAL_V) 'step 158
             .Enqueue(Instruction.GO_GAS) 'step 159
             .Enqueue(Instruction.GET_SURPRISE) 'step 160
             .Enqueue(Instruction.GET_MSG_NEUTRAL) 'step 161
-            .Enqueue(Instruction.GO_REVERSE) 'step 162
+            .Enqueue(Instruction.GO_REVERSE_V) 'step 162
             .Enqueue(Instruction.GO_GAS) 'step 163
             .Enqueue(Instruction.GET_SURPRISE) 'step 164
             .Enqueue(Instruction.GET_MSG_REVERSE) 'step 165
-            .Enqueue(Instruction.GO_DRIVE) 'step 166
+            .Enqueue(Instruction.GO_DRIVE_V) 'step 166
             .Enqueue(Instruction.GO_GAS) 'step 167
             .Enqueue(Instruction.GET_SURPRISE) 'step 168
             .Enqueue(Instruction.GET_MSG_DRIVE) 'step 169
-            .Enqueue(Instruction.GO_PARK) 'step 170
+            .Enqueue(Instruction.GO_PARK_V) 'step 170
             .Enqueue(Instruction.GO_GAS) 'step 171
             .Enqueue(Instruction.GET_SURPRISE) 'step 172
             .Enqueue(Instruction.GET_MSG_PARK) 'step 173
-            .Enqueue(Instruction.GO_DRIVE) 'step 174
+            .Enqueue(Instruction.GO_DRIVE_V) 'step 174
             .Enqueue(Instruction.GO_GAS) 'step 175
             .Enqueue(Instruction.GET_SURPRISE) 'step 176
             .Enqueue(Instruction.GET_MSG_DRIVE) 'step 177
-            .Enqueue(Instruction.GO_NEUTRAL) 'step 178
+            .Enqueue(Instruction.GO_NEUTRAL_V) 'step 178
             .Enqueue(Instruction.GO_GAS) 'step 179
             .Enqueue(Instruction.GET_SURPRISE) 'step 180
             .Enqueue(Instruction.GET_MSG_NEUTRAL) 'step 181
             .Enqueue(Instruction.GO_REVERSE_SPECIAL) 'step 182
             .Enqueue(Instruction.GO_GAS) 'step 183
-            .Enqueue(Instruction.GET_MSG_NEUTRAL) 'step 184
-            .Enqueue(Instruction.GET_MSG_END) 'step 184
+            .Enqueue(Instruction.GET_SURPRISE) 'step 184
+            .Enqueue(Instruction.GET_MSG_END) 'step 185
+
 
             ' this is old stuff
             '.Enqueue(Instruction.GO_OPEN)
@@ -372,29 +376,51 @@ Public Class frmMain
 
         Dim now = DateTime.Now
 
-        Dim failToShift As Boolean = Rnd() < failureRate
-        If Not zLocked And ((now - lastShiftTime).TotalMilliseconds >= shiftCooldown) Then
-            'If goToDrive And ((z < zMin + zSlop) Or (z > axisMax - zSlop)) Then
-            '    zLocked = True
-            '    SetDriveMode(DriveStates.DRIVE)
-            '    lastShiftTime = now
-            '    goToDrive = False
-            'Else
-            If failToShift And ((z < zMin + zSlop) Or (z > axisMax - zSlop)) Then
-                zLocked = True
-                lastShiftTime = now
-            ElseIf z < zMin + zSlop Then
-                zLocked = True
-                ShiftUp()
-                lastShiftTime = now
-            ElseIf z > axisMax - zSlop Then
-                zLocked = True
-                ShiftDown()
-                lastShiftTime = now
+        Dim isShiftUp As Boolean = (z < zMin + zSlop)
+        Dim isShiftDown As Boolean = (z > axisMax - zSlop)
+        Dim isShift As Boolean = isShiftUp Or isShiftDown
+
+        Dim isCooldownOver As Boolean = (now - lastShiftTime).TotalMilliseconds >= shiftCooldown
+        Dim canShift As Boolean = Not zLocked AndAlso isCooldownOver
+
+        If canShift AndAlso isShift Then
+            Dim failToShift As Boolean = Rnd() < failureRate
+            If isShiftUp Then
+                If Not failToShift Then ShiftUp()
+                ConceptualShiftUp()
+            ElseIf isShiftDown Then
+                If Not failToShift Then ShiftDown()
+                ConceptualShiftDown()
             End If
-        ElseIf (z >= zMin + zSlop) And (z <= axisMax - zSlop) Then
+            zLocked = True
+            lastShiftTime = DateTime.Now
+        ElseIf Not isShift Then
             zLocked = False
         End If
+
+        'If Not zLocked And ((now - lastShiftTime).TotalMilliseconds >= shiftCooldown) Then
+        '    If failToShift And isShift Then
+        '        If isShiftUp Then
+        '            ConceptualShiftUp()
+        '        ElseIf isShiftDown Then
+        '            ConceptualShiftDown()
+        '        End If
+        '        zLocked = True
+        '        lastShiftTime = now
+        '    ElseIf isShiftUp Then
+        '        zLocked = True
+        '        ShiftUp()
+        '        ConceptualShiftUp()
+        '        lastShiftTime = now
+        '    ElseIf isShiftDown Then
+        '        zLocked = True
+        '        ShiftDown()
+        '        ConceptualShiftDown()
+        '        lastShiftTime = now
+        '    End If
+        'ElseIf Not isShift Then
+        '    zLocked = False
+        'End If
 
         picWheel.Image = RotateImage(originalImage, ((x - axisMax / 2) / axisMax) * 180) ' Rotate based on X axis input
         picShifter.Top = shiftDefaultTop + ((z - axisMax / 2) / axisMax) * maxShiftTop ' Adjust Y position based on Y axis input
@@ -404,20 +430,25 @@ Public Class frmMain
         If lblInstructions.Text = Instruction.WAIT And instructions.Count > 0 Then
             nextInstructionCountDown = 0
         End If
-        If Instruction.IsGasInstruction(lblInstructions.Text) And instructedMode <> driveMode Then
+
+        isVague = Instruction.IsVagueInstruction(lblInstructions.Text) Or isVague And Instruction.IsGasInstruction(lblInstructions.Text)
+        Dim isNotVague As Boolean = Not isVague
+
+        If Instruction.IsGasInstruction(lblInstructions.Text) And instructedMode <> driveMode And isNotVague Then
             lastInstruction = If(lblInstructions.Text <> DriveStateToInstruction(instructedMode), lblInstructions.Text, lastInstruction)
             lblInstructions.Text = DriveStateToInstruction(instructedMode)
             revertCommand = True
             'Private lastInstruction As String = ""
             'Private revertCommand As Boolean = False
-        ElseIf revertCommand And instructedMode = driveMode Then
+        ElseIf revertCommand And instructedMode = driveMode And isNotVague Then
             lblInstructions.Text = lastInstruction
             lastInstruction = ""
             revertCommand = False
         Else
             If nextInstructionCountDown < 0 And ((
                 (Instruction.IsGasInstruction(lblInstructions.Text) And driveButton) Or
-                (driveMode = instructionToDriveState())
+                (isNotVague And driveMode = instructionToDriveState()) Or
+                (isVague And selectedMode = instructionToDriveState())
             )) Then
                 nextInstructionCountDown = Instruction.GetTickCount(lblInstructions.Text)
             ElseIf nextInstructionCountDown = 0 Then
@@ -438,6 +469,7 @@ Public Class frmMain
                             Dim nextMode As String = MsgToDriveState(instructions.Peek())
                             If nextMode <> "" Then
                                 SetDriveMode(nextMode)
+                                SetSelectedDriveMode(nextMode)
                             End If
                         Else
                             'should never get here
@@ -476,16 +508,17 @@ Public Class frmMain
     End Sub
 
     Private Function instructionToDriveState(Optional inst As String = "") As String
+        'this works even for vague instructions due to the trimming
         Dim lookupVal As String
         If inst = "" Then
             lookupVal = lblInstructions.Text
         Else
             lookupVal = inst
         End If
-        Select Case lookupVal
+        Select Case Trim(lookupVal)
             Case Instruction.GO_PARK
                 Return DriveStates.PARK
-            Case Instruction.GO_REVERSE, Instruction.GO_REVERSE_SPECIAL
+            Case Instruction.GO_REVERSE
                 Return DriveStates.REVERSE
             Case Instruction.GO_NEUTRAL
                 Return DriveStates.NEUTRAL
@@ -526,6 +559,32 @@ Public Class frmMain
         End Select
     End Function
 
+    Private Sub ConceptualShiftUp()
+        Select Case selectedMode
+            Case DriveStates.PARK
+                SetSelectedDriveMode(DriveStates.PARK)
+            Case DriveStates.REVERSE
+                SetSelectedDriveMode(DriveStates.PARK)
+            Case DriveStates.NEUTRAL
+                SetSelectedDriveMode(DriveStates.REVERSE)
+            Case DriveStates.DRIVE
+                SetSelectedDriveMode(DriveStates.NEUTRAL)
+        End Select
+    End Sub
+
+    Private Sub ConceptualShiftDown()
+        Select Case selectedMode
+            Case DriveStates.PARK
+                SetSelectedDriveMode(DriveStates.REVERSE)
+            Case DriveStates.REVERSE
+                SetSelectedDriveMode(DriveStates.NEUTRAL)
+            Case DriveStates.NEUTRAL
+                SetSelectedDriveMode(DriveStates.DRIVE)
+            Case DriveStates.DRIVE
+                SetSelectedDriveMode(DriveStates.DRIVE)
+        End Select
+    End Sub
+
     Private Sub ShiftUp()
         Select Case driveMode
             Case DriveStates.PARK
@@ -555,6 +614,11 @@ Public Class frmMain
     Private Sub SetDriveMode(newMode As String)
         driveMode = newMode
         lblDriveMode.Text = driveMode
+    End Sub
+
+    Private Sub SetSelectedDriveMode(newMode As String)
+        selectedMode = newMode
+        lblSelected.Text = selectedMode
     End Sub
 
     Private Function RotateImage(img As Image, angle As Single) As Bitmap
@@ -666,6 +730,7 @@ Public Class frmMain
         End If
         outString += $",ActualState:{driveMode},InstructedState:{instructedMode}"
         outFile.WriteLine(outString)
+        outFile.Flush()
         outStepCounter += 1
     End Sub
 

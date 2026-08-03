@@ -40,6 +40,7 @@ Partial Class frmMain
         Button1 = New Button()
         lblAssigned = New Label()
         lblDriveMode = New Label()
+        lblSelected = New Label()
         CType(picWheel, ComponentModel.ISupportInitialize).BeginInit()
         CType(picShifter, ComponentModel.ISupportInitialize).BeginInit()
         CType(picAnimation, ComponentModel.ISupportInitialize).BeginInit()
@@ -113,6 +114,7 @@ Partial Class frmMain
         GroupBox1.Controls.Add(Button5)
         GroupBox1.Controls.Add(Button4)
         GroupBox1.Controls.Add(Button1)
+        GroupBox1.Controls.Add(lblSelected)
         GroupBox1.Controls.Add(lblAssigned)
         GroupBox1.Controls.Add(lblDriveMode)
         GroupBox1.Location = New Point(1351, 517)
@@ -187,7 +189,7 @@ Partial Class frmMain
         ' lblAssigned
         ' 
         lblAssigned.AutoSize = True
-        lblAssigned.Location = New Point(542, 48)
+        lblAssigned.Location = New Point(507, 48)
         lblAssigned.Name = "lblAssigned"
         lblAssigned.Size = New Size(92, 32)
         lblAssigned.TabIndex = 9
@@ -201,6 +203,15 @@ Partial Class frmMain
         lblDriveMode.Size = New Size(92, 32)
         lblDriveMode.TabIndex = 9
         lblDriveMode.Text = "(P) Park"
+        ' 
+        ' lblSelected
+        ' 
+        lblSelected.AutoSize = True
+        lblSelected.Location = New Point(605, 48)
+        lblSelected.Name = "lblSelected"
+        lblSelected.Size = New Size(92, 32)
+        lblSelected.TabIndex = 9
+        lblSelected.Text = "(P) Park"
         ' 
         ' frmMain
         ' 
@@ -242,5 +253,6 @@ Partial Class frmMain
     Friend WithEvents Button1 As Button
     Friend WithEvents lblDriveMode As Label
     Friend WithEvents lblAssigned As Label
+    Friend WithEvents lblSelected As Label
 
 End Class
