@@ -13,11 +13,11 @@ Public Class frmFuzzyInput
                 End If
             End If
         Next con
-        If MsgBox("Are you sure you want to continue? Click Yes to conrirm the ratings you have provided on the form. Click No to review your ratings.", MsgBoxStyle.YesNo + MsgBoxStyle.Question, "Confirm Ratings") = MsgBoxResult.Yes Then
-            Me.DialogResult = DialogResult.OK
-            userClose = False
-            Me.Close()
-        End If
+        'If MsgBox("Are you sure you want to continue? Click Yes to conrirm the ratings you have provided on the form. Click No to review your ratings.", MsgBoxStyle.YesNo + MsgBoxStyle.Question, "Confirm Ratings") = MsgBoxResult.Yes Then
+        Me.DialogResult = DialogResult.OK
+        userClose = False
+        Me.Close()
+        'End If
     End Sub
 
     Private Sub frmFuzzyState_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing

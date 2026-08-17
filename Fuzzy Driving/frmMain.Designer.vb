@@ -30,7 +30,7 @@ Partial Class frmMain
         picAnimation = New PictureBox()
         PictureBox1 = New PictureBox()
         lblInstructions = New Label()
-        GroupBox1 = New GroupBox()
+        groupDebug = New GroupBox()
         TextBox1 = New TextBox()
         Button3 = New Button()
         Button2 = New Button()
@@ -38,14 +38,16 @@ Partial Class frmMain
         Button5 = New Button()
         Button4 = New Button()
         Button1 = New Button()
+        lblSelected = New Label()
         lblAssigned = New Label()
         lblDriveMode = New Label()
-        lblSelected = New Label()
+        lblStartAt = New Label()
+        Label1 = New Label()
         CType(picWheel, ComponentModel.ISupportInitialize).BeginInit()
         CType(picShifter, ComponentModel.ISupportInitialize).BeginInit()
         CType(picAnimation, ComponentModel.ISupportInitialize).BeginInit()
         CType(PictureBox1, ComponentModel.ISupportInitialize).BeginInit()
-        GroupBox1.SuspendLayout()
+        groupDebug.SuspendLayout()
         SuspendLayout()
         ' 
         ' picWheel
@@ -96,33 +98,32 @@ Partial Class frmMain
         ' lblInstructions
         ' 
         lblInstructions.BackColor = SystemColors.GradientInactiveCaption
-        lblInstructions.BorderStyle = BorderStyle.FixedSingle
-        lblInstructions.Font = New Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
-        lblInstructions.Location = New Point(981, 735)
+        lblInstructions.Font = New Font("Segoe UI", 10.125F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
+        lblInstructions.Location = New Point(981, 818)
         lblInstructions.Name = "lblInstructions"
-        lblInstructions.Size = New Size(273, 287)
+        lblInstructions.Size = New Size(273, 194)
         lblInstructions.TabIndex = 6
-        lblInstructions.Text = "Wait for instructions"
-        lblInstructions.TextAlign = ContentAlignment.MiddleCenter
+        lblInstructions.TextAlign = ContentAlignment.TopCenter
         ' 
-        ' GroupBox1
+        ' groupDebug
         ' 
-        GroupBox1.Controls.Add(TextBox1)
-        GroupBox1.Controls.Add(Button3)
-        GroupBox1.Controls.Add(Button2)
-        GroupBox1.Controls.Add(Button6)
-        GroupBox1.Controls.Add(Button5)
-        GroupBox1.Controls.Add(Button4)
-        GroupBox1.Controls.Add(Button1)
-        GroupBox1.Controls.Add(lblSelected)
-        GroupBox1.Controls.Add(lblAssigned)
-        GroupBox1.Controls.Add(lblDriveMode)
-        GroupBox1.Location = New Point(1351, 517)
-        GroupBox1.Name = "GroupBox1"
-        GroupBox1.Size = New Size(696, 254)
-        GroupBox1.TabIndex = 9
-        GroupBox1.TabStop = False
-        GroupBox1.Text = "groupDebug"
+        groupDebug.Controls.Add(TextBox1)
+        groupDebug.Controls.Add(Button3)
+        groupDebug.Controls.Add(Button2)
+        groupDebug.Controls.Add(Button6)
+        groupDebug.Controls.Add(Button5)
+        groupDebug.Controls.Add(Button4)
+        groupDebug.Controls.Add(Button1)
+        groupDebug.Controls.Add(lblSelected)
+        groupDebug.Controls.Add(lblAssigned)
+        groupDebug.Controls.Add(lblDriveMode)
+        groupDebug.Location = New Point(1351, 517)
+        groupDebug.Name = "groupDebug"
+        groupDebug.Size = New Size(696, 254)
+        groupDebug.TabIndex = 9
+        groupDebug.TabStop = False
+        groupDebug.Text = "groupDebug"
+        groupDebug.Visible = False
         ' 
         ' TextBox1
         ' 
@@ -186,6 +187,15 @@ Partial Class frmMain
         Button1.Text = "FuzzyState"
         Button1.UseVisualStyleBackColor = True
         ' 
+        ' lblSelected
+        ' 
+        lblSelected.AutoSize = True
+        lblSelected.Location = New Point(605, 48)
+        lblSelected.Name = "lblSelected"
+        lblSelected.Size = New Size(92, 32)
+        lblSelected.TabIndex = 9
+        lblSelected.Text = "(P) Park"
+        ' 
         ' lblAssigned
         ' 
         lblAssigned.AutoSize = True
@@ -204,27 +214,41 @@ Partial Class frmMain
         lblDriveMode.TabIndex = 9
         lblDriveMode.Text = "(P) Park"
         ' 
-        ' lblSelected
+        ' lblStartAt
         ' 
-        lblSelected.AutoSize = True
-        lblSelected.Location = New Point(605, 48)
-        lblSelected.Name = "lblSelected"
-        lblSelected.Size = New Size(92, 32)
-        lblSelected.TabIndex = 9
-        lblSelected.Text = "(P) Park"
+        lblStartAt.BackColor = SystemColors.GradientInactiveCaption
+        lblStartAt.Font = New Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
+        lblStartAt.Location = New Point(981, 729)
+        lblStartAt.Name = "lblStartAt"
+        lblStartAt.Size = New Size(273, 68)
+        lblStartAt.TabIndex = 6
+        lblStartAt.TextAlign = ContentAlignment.MiddleCenter
+        ' 
+        ' Label1
+        ' 
+        Label1.BackColor = SystemColors.GradientInactiveCaption
+        Label1.Font = New Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
+        Label1.Location = New Point(981, 797)
+        Label1.Name = "Label1"
+        Label1.Size = New Size(273, 21)
+        Label1.TabIndex = 6
+        Label1.TextAlign = ContentAlignment.MiddleCenter
         ' 
         ' frmMain
         ' 
         AutoScaleDimensions = New SizeF(13F, 32F)
         AutoScaleMode = AutoScaleMode.Font
         ClientSize = New Size(2059, 1333)
-        Controls.Add(GroupBox1)
+        Controls.Add(groupDebug)
+        Controls.Add(Label1)
+        Controls.Add(lblStartAt)
         Controls.Add(lblInstructions)
         Controls.Add(PictureBox1)
         Controls.Add(picAnimation)
         Controls.Add(picShifter)
         Controls.Add(picWheel)
         FormBorderStyle = FormBorderStyle.FixedDialog
+        KeyPreview = True
         MaximizeBox = False
         MinimizeBox = False
         Name = "frmMain"
@@ -232,8 +256,8 @@ Partial Class frmMain
         CType(picShifter, ComponentModel.ISupportInitialize).EndInit()
         CType(picAnimation, ComponentModel.ISupportInitialize).EndInit()
         CType(PictureBox1, ComponentModel.ISupportInitialize).EndInit()
-        GroupBox1.ResumeLayout(False)
-        GroupBox1.PerformLayout()
+        groupDebug.ResumeLayout(False)
+        groupDebug.PerformLayout()
         ResumeLayout(False)
         PerformLayout()
     End Sub
@@ -243,7 +267,7 @@ Partial Class frmMain
     Friend WithEvents picAnimation As PictureBox
     Friend WithEvents PictureBox1 As PictureBox
     Friend WithEvents lblInstructions As Label
-    Friend WithEvents GroupBox1 As GroupBox
+    Friend WithEvents groupDebug As GroupBox
     Friend WithEvents TextBox1 As TextBox
     Friend WithEvents Button3 As Button
     Friend WithEvents Button2 As Button
@@ -254,5 +278,7 @@ Partial Class frmMain
     Friend WithEvents lblDriveMode As Label
     Friend WithEvents lblAssigned As Label
     Friend WithEvents lblSelected As Label
+    Friend WithEvents lblStartAt As Label
+    Friend WithEvents Label1 As Label
 
 End Class
